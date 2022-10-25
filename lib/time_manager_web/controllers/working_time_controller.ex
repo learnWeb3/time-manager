@@ -15,7 +15,6 @@ defmodule TimeManagerWeb.WorkingTimeController do
     {userId, ""} = Integer.parse(userId)
     startDate = Map.get(working_time_params, "start")
     endDate = Map.get(working_time_params, "end")
-
     working_time = Application.create_working_time(userId, startDate, endDate)
     conn
     |> put_status(:created)
