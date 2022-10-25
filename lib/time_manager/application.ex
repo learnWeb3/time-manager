@@ -2,7 +2,8 @@ defmodule TimeManager.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
-
+  import Ecto.Query, only: [from: 2]
+  alias TimeManager.Repo
   use Application
   import Ecto.Query, only: [from: 2]
   alias TimeManager.Repo
@@ -169,6 +170,11 @@ defmodule TimeManager.Application do
 
   """
   def get_clock!(id), do: Repo.get!(Clock, id)
+
+  def get_user_clocks(userId) do
+    query = from clock in Clock, where: clock.user == ^userId
+    Repo.all(query)
+  end
 
   @doc """
   Creates a clock.
