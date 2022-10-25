@@ -1,8 +1,6 @@
 defmodule TimeManagerWeb.ClockController do
   use TimeManagerWeb, :controller
-
   alias TimeManager.Application
-  alias TimeManager.Application.Clock
 
   action_fallback(TimeManagerWeb.FallbackController)
 
@@ -12,13 +10,13 @@ defmodule TimeManagerWeb.ClockController do
   # end
 
   def create(conn, %{"userId" => userId, "clock" => clock_params}) do
-    all_params = Map.put(clock_params, :user, userId)
-
-    with {:ok, %Clock{} = clock} <- Application.create_clock(all_params) do
-      conn
-      |> put_status(:created)
-      |> render("show.json", clock: clock)
-    end
+    {userId, ""} = Integer.parse(userId)
+    time = Map.get(clock_params, "time");
+    status = Map.get(clock_params, "status", true)
+    clock = Application.create_clock(userId, time, status)
+    conn
+    |> put_status(:created)
+    |> render("show.json", clock: clock)
   end
 
   def user_clocks(conn, %{"userId" => userId}) do

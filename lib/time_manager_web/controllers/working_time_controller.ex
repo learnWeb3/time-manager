@@ -4,20 +4,22 @@ defmodule TimeManagerWeb.WorkingTimeController do
   alias TimeManager.Application
   alias TimeManager.Application.WorkingTime
 
-  action_fallback TimeManagerWeb.FallbackController
+  action_fallback(TimeManagerWeb.FallbackController)
 
-  def index(conn, _params) do
-    working_times = Application.list_working_times()
+  def index(conn, %{"userId" => userId, "start" => startDate, "end" => endDate}) do
+    working_times = Application.list_working_times(userId, startDate, endDate)
     render(conn, "index.json", working_times: working_times)
   end
 
-  def create(conn, %{"working_time" => working_time_params}) do
-    with {:ok, %WorkingTime{} = working_time} <- Application.create_working_time(working_time_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.working_time_path(conn, :show, working_time))
-      |> render("show.json", working_time: working_time)
-    end
+  def create(conn, %{"userId" => userId, "working_time" => working_time_params}) do
+    {userId, ""} = Integer.parse(userId)
+    startDate = Map.get(working_time_params, "start")
+    endDate = Map.get(working_time_params, "end")
+
+    working_time = Application.create_working_time(userId, startDate, endDate)
+    conn
+    |> put_status(:created)
+    |> render("show.json", working_time: working_time)
   end
 
   def show(conn, %{"id" => id}) do
@@ -28,7 +30,8 @@ defmodule TimeManagerWeb.WorkingTimeController do
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do
     working_time = Application.get_working_time!(id)
 
-    with {:ok, %WorkingTime{} = working_time} <- Application.update_working_time(working_time, working_time_params) do
+    with {:ok, %WorkingTime{} = working_time} <-
+           Application.update_working_time(working_time, working_time_params) do
       render(conn, "show.json", working_time: working_time)
     end
   end
