@@ -23,7 +23,7 @@ config :time_manager, TimeManagerWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   # set to true if full webpage provided by phoenix is needed
-  debug_errors: true,
+  debug_errors: false,
   secret_key_base: "OwkGn0b+FhgzUQZ8q3E75otPk9GsdDRUMSTot2nHWIFq3gMb8FqYfgr955PERAQ5",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)

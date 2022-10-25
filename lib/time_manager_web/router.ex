@@ -27,7 +27,7 @@ defmodule TimeManagerWeb.Router do
     resources "/workingtimes", WorkingTimeController, only: [:update, :delete]
     get "/workingtimes/:userId", WorkingTimeController, :index
     get "/workingtimes/:userId/:id", WorkingTimeController, :show
-    get "/clocks/:userId", ClockController, :show
+    get "/clocks/:userId", ClockController, :user_clocks
     post "/clocks/:userId", ClockController, :create
   end
 

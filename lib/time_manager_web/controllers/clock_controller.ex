@@ -17,14 +17,13 @@ defmodule TimeManagerWeb.ClockController do
     with {:ok, %Clock{} = clock} <- Application.create_clock(all_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.clock_path(conn, :show, clock))
       |> render("show.json", clock: clock)
     end
   end
 
-  def show(conn, %{"userId" => userId}) do
-    clock = Application.get_clock_by_user(userId)
-    render(conn, "show.json", clock: clock)
+  def user_clocks(conn, %{"userId" => userId}) do
+    user_clocks = Application.get_user_clocks(userId)
+    render(conn, "index.json", clocks: user_clocks)
   end
 
   # def update(conn, %{"id" => id, "clock" => clock_params}) do
