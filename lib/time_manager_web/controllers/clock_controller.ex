@@ -4,15 +4,17 @@ defmodule TimeManagerWeb.ClockController do
   alias TimeManager.Application
   alias TimeManager.Application.Clock
 
-  action_fallback TimeManagerWeb.FallbackController
+  action_fallback(TimeManagerWeb.FallbackController)
 
-  def index(conn, _params) do
-    clocks = Application.list_clocks()
-    render(conn, "index.json", clocks: clocks)
-  end
+  # def index(conn, _params) do
+  #   clocks = Application.list_clocks()
+  #   render(conn, "index.json", clocks: clocks)
+  # end
 
-  def create(conn, %{"clock" => clock_params}) do
-    with {:ok, %Clock{} = clock} <- Application.create_clock(clock_params) do
+  def create(conn, %{"userId" => userId, "clock" => clock_params}) do
+    all_params = Map.put(clock_params, :user, userId)
+
+    with {:ok, %Clock{} = clock} <- Application.create_clock(all_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.clock_path(conn, :show, clock))
@@ -20,24 +22,24 @@ defmodule TimeManagerWeb.ClockController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    clock = Application.get_clock!(id)
+  def show(conn, %{"userId" => userId}) do
+    clock = Application.get_clock_by_user(userId)
     render(conn, "show.json", clock: clock)
   end
 
-  def update(conn, %{"id" => id, "clock" => clock_params}) do
-    clock = Application.get_clock!(id)
+  # def update(conn, %{"id" => id, "clock" => clock_params}) do
+  #   clock = Application.get_clock!(id)
 
-    with {:ok, %Clock{} = clock} <- Application.update_clock(clock, clock_params) do
-      render(conn, "show.json", clock: clock)
-    end
-  end
+  #   with {:ok, %Clock{} = clock} <- Application.update_clock(clock, clock_params) do
+  #     render(conn, "show.json", clock: clock)
+  #   end
+  # end
 
-  def delete(conn, %{"id" => id}) do
-    clock = Application.get_clock!(id)
+  # def delete(conn, %{"id" => id}) do
+  #   clock = Application.get_clock!(id)
 
-    with {:ok, %Clock{}} <- Application.delete_clock(clock) do
-      send_resp(conn, :no_content, "")
-    end
-  end
+  #   with {:ok, %Clock{}} <- Application.delete_clock(clock) do
+  #     send_resp(conn, :no_content, "")
+  #   end
+  # end
 end
