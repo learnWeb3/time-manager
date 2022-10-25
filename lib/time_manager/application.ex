@@ -4,6 +4,8 @@ defmodule TimeManager.Application do
   @moduledoc false
 
   use Application
+  import Ecto.Query, only: [from: 2]
+  alias TimeManager.Repo
 
   @impl true
   def start(_type, _args) do
@@ -45,8 +47,15 @@ defmodule TimeManager.Application do
       [%User{}, ...]
 
   """
-  def list_users do
-    Repo.all(User)
+  def list_users(params) do
+    case params do
+      %{"username" => username, "email" => email}->
+        query = from u in User,
+            where: u.username == ^username
+            and u.email == ^email
+      Repo.all(query)
+      %{} -> Repo.all(User)
+    end
   end
 
   @doc """
