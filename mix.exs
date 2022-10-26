@@ -50,7 +50,8 @@ defmodule TimeManager.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, "~> 0.11"},
       {:corsica, "~> 1.2"},
-      {:joken, "~> 2.5"}
+      {:joken, "~> 2.5"},
+      {:bcrypt_elixir, "~> 3.0"}
     ]
   end
 

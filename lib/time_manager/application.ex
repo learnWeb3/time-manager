@@ -4,6 +4,8 @@ defmodule TimeManager.Application do
   @moduledoc false
   import Ecto.Query, only: [from: 2]
   alias TimeManager.Repo
+  alias Elixir.BcryptElixir
+  alias Elixir.Bcrypt
   use Application
 
   @impl true
@@ -37,17 +39,25 @@ defmodule TimeManager.Application do
 
   alias TimeManager.Application.User
 
-
-  def find_user_by_email do
-
+  def encode_password(password) do
+    Bcrypt.Base.hash_password(password, Bcrypt.Base.gen_salt(12, true))
   end
+
+  def verify_user(password, stored_hash) do
+    Bcrypt.verify_pass(password, stored_hash)
+  end
+
   def sign_in(email, password) do
+    user = Repo.get_by!(User, email: email)
 
+    check = verify_user(password, user.password)
 
-    {:ok, token, claims} = TimeManager.Application.JwtToken.generate_and_sign()
-
-    extra_claims = %{"user_id" => "some_id"}
-    token_with_default_plus_custom_claims = MyApp.Token.generate_and_sign!(extra_claims)
+    if check do
+      extra_claims = %{"sub" => user.id}
+      TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
+    else
+      nil
+    end
   end
 
   @doc """
@@ -92,6 +102,10 @@ defmodule TimeManager.Application do
 
   """
   def create_user(attrs \\ %{}) do
+    plain_text_password = Map.get(attrs, "password")
+    %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
+    attrs = Map.put(attrs, "password", hashed_password)
+
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()

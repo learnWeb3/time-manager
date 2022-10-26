@@ -28,6 +28,7 @@ defmodule TimeManagerWeb.Router do
     resources "/workingtimes", WorkingTimeController, only: [:update, :delete]
     get "/clocks/:userId", ClockController, :user_clocks
     post "/clocks/:userId", ClockController, :create
+    post "/sessions/login", SessionController, :login
   end
 
   # Enables LiveDashboard only for development

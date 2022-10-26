@@ -77,3 +77,6 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Initialize the secret used to encode JWT token to serve authentication purposes
 config :joken, default_signer: "jwt-secret"
+
+# Initialize configuration for bcrypt library to encode password in database
+config :bcrypt_elixir, :log_rounds, 4
