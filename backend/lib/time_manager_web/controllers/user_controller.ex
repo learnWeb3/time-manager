@@ -4,7 +4,9 @@ defmodule TimeManagerWeb.UserController do
   alias TimeManager.Application
   alias TimeManager.Application.User
 
-  action_fallback TimeManagerWeb.FallbackController
+  action_fallback(TimeManagerWeb.FallbackController)
+
+  plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
   def index(conn, _params) do
     users = Application.list_users()

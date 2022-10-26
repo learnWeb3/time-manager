@@ -194,7 +194,7 @@ defmodule TimeManager.Application do
   def get_clock!(id), do: Repo.get!(Clock, id)
 
   def get_user_clocks(userId) do
-    query = from(clock in Clock, where: clock.user == ^userId)
+    query = from(clock in Clock, where: clock.user_id == ^userId)
     Repo.all(query)
   end
 
