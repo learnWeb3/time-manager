@@ -1,5 +1,7 @@
 backend/deps
+backend/build
 deps
+build
 
 .DS_Store
 .thumbs.db
