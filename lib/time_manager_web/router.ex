@@ -16,17 +16,16 @@ defmodule TimeManagerWeb.Router do
 
   scope "/", TimeManagerWeb do
     pipe_through :browser
-
-    get "/", PageController, :index
   end
 
   # Other scopes may use custom stacks.
   scope "/api", TimeManagerWeb do
     pipe_through :api
     resources "/users", UserController, except: [:new, :edit]
-    resources "/workingtimes", WorkingTimeController, only: [:update, :delete]
     get "/workingtimes/:userId", WorkingTimeController, :index
+    post "/workingtimes/:userId", WorkingTimeController, :create
     get "/workingtimes/:userId/:id", WorkingTimeController, :show
+    resources "/workingtimes", WorkingTimeController, only: [:update, :delete]
     get "/clocks/:userId", ClockController, :user_clocks
     post "/clocks/:userId", ClockController, :create
   end

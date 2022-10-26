@@ -172,7 +172,7 @@ defmodule TimeManager.Application do
   def get_clock!(id), do: Repo.get!(Clock, id)
 
   def get_user_clocks(userId) do
-    query = from clock in Clock, where: clock.user == ^userId
+    query = from(clock in Clock, where: clock.user == ^userId)
     Repo.all(query)
   end
 
@@ -188,10 +188,16 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_clock(attrs \\ %{}) do
-    %Clock{}
-    |> Clock.changeset(attrs)
-    |> Repo.insert()
+  def create_clock(userId, time, status) do
+    user = get_user!(userId)
+
+    clock = %Clock{
+      user: user,
+      time: time,
+      status: status
+    }
+
+    Repo.insert!(clock)
   end
 
   @doc """
@@ -252,8 +258,40 @@ defmodule TimeManager.Application do
       [%WorkingTime{}, ...]
 
   """
-  def list_working_times do
-    Repo.all(WorkingTime)
+  def list_working_times(userId, startDate, endDate) do
+    cond do
+      !startDate and !endDate ->
+        query =
+          from(workingtime in WorkingTime,
+            where: workingtime.user == ^userId
+          )
+
+        Repo.all(query)
+
+      !startDate and endDate ->
+        {endDate, ""} = Integer.parse(endDate)
+
+        query =
+          from(workingtime in WorkingTime,
+            where:
+              workingtime.user == ^userId and
+                workingtime.end >= ^endDate
+          )
+
+        Repo.all(query)
+
+      startDate and !endDate ->
+        {startDate, ""} = Integer.parse(startDate)
+
+        query =
+          from(workingtime in WorkingTime,
+            where:
+              workingtime.user == ^userId and
+                workingtime.start >= ^startDate
+          )
+
+        Repo.all(query)
+    end
   end
 
   @doc """
@@ -284,10 +322,16 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_working_time(attrs \\ %{}) do
-    %WorkingTime{}
-    |> WorkingTime.changeset(attrs)
-    |> Repo.insert()
+  def create_working_time(userId, startDate, endDate) do
+    user = get_user!(userId)
+
+    working_time = %WorkingTime{
+      user: user,
+      start: startDate,
+      end: endDate
+    }
+
+    Repo.insert!(working_time)
   end
 
   @doc """
