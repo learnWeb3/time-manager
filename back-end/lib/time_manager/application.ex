@@ -260,34 +260,48 @@ defmodule TimeManager.Application do
   """
   def list_working_times(userId, startDate, endDate) do
     cond do
-      !startDate and !endDate ->
+      is_nil(startDate) and is_nil(endDate) ->
         query =
           from(workingtime in WorkingTime,
-            where: workingtime.user == ^userId
+            where: workingtime.user_id == ^userId
           )
 
         Repo.all(query)
 
-      !startDate and endDate ->
+      is_nil(startDate) and String.length(endDate) > 0 ->
         {endDate, ""} = Integer.parse(endDate)
 
         query =
           from(workingtime in WorkingTime,
             where:
-              workingtime.user == ^userId and
+              workingtime.user_id == ^userId and
                 workingtime.end >= ^endDate
           )
 
         Repo.all(query)
 
-      startDate and !endDate ->
+      String.length(startDate) > 0 and is_nil(endDate) ->
         {startDate, ""} = Integer.parse(startDate)
 
         query =
           from(workingtime in WorkingTime,
             where:
-              workingtime.user == ^userId and
+              workingtime.user_id == ^userId and
                 workingtime.start >= ^startDate
+          )
+
+        Repo.all(query)
+
+      String.length(startDate) > 0 and String.length(endDate) > 0 ->
+        {endDate, ""} = Integer.parse(endDate)
+        {startDate, ""} = Integer.parse(startDate)
+
+        query =
+          from(workingtime in WorkingTime,
+            where:
+              workingtime.user_id == ^userId and
+                workingtime.start >= ^startDate and
+                workingtime.end >= ^endDate
           )
 
         Repo.all(query)
