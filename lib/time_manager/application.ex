@@ -47,6 +47,10 @@ defmodule TimeManager.Application do
     Bcrypt.verify_pass(password, stored_hash)
   end
 
+  def verify_token(bearer_token) do
+    TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+  end
+
   def sign_in(email, password) do
     user = Repo.get_by!(User, email: email)
 
