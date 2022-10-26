@@ -4,6 +4,8 @@ defmodule TimeManager.Application do
   @moduledoc false
   import Ecto.Query, only: [from: 2]
   alias TimeManager.Repo
+  alias Elixir.BcryptElixir
+  alias Elixir.Bcrypt
   use Application
   import Ecto.Query, only: [from: 2]
   alias TimeManager.Repo
@@ -38,6 +40,31 @@ defmodule TimeManager.Application do
   end
 
   alias TimeManager.Application.User
+
+  def encode_password(password) do
+    Bcrypt.Base.hash_password(password, Bcrypt.Base.gen_salt(12, true))
+  end
+
+  def verify_user(password, stored_hash) do
+    Bcrypt.verify_pass(password, stored_hash)
+  end
+
+  def verify_token(bearer_token) do
+    TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+  end
+
+  def sign_in(email, password) do
+    user = Repo.get_by!(User, email: email)
+
+    check = verify_user(password, user.password)
+
+    if check do
+      extra_claims = %{"sub" => user.id}
+      TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
+    else
+      nil
+    end
+  end
 
   @doc """
   Returns the list of users.
@@ -88,6 +115,10 @@ defmodule TimeManager.Application do
 
   """
   def create_user(attrs \\ %{}) do
+    plain_text_password = Map.get(attrs, "password")
+    %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
+    attrs = Map.put(attrs, "password", hashed_password)
+
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
@@ -360,10 +391,24 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_working_time(%WorkingTime{} = working_time, attrs) do
-    working_time
-    |> WorkingTime.changeset(attrs)
-    |> Repo.update()
+  def update_working_time(id, startDate, endDate) do
+    cond do
+      is_nil(startDate) and not is_nil(endDate) and is_integer(endDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{end: endDate})
+        |> Repo.update()
+
+      is_nil(endDate) and not is_nil(startDate) and is_integer(startDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{start: startDate})
+        |> Repo.update()
+
+      not is_nil(startDate) and is_integer(endDate) and not is_nil(endDate) and
+          is_integer(endDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{start: startDate, end: endDate})
+        |> Repo.update()
+    end
   end
 
   @doc """
