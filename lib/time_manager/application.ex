@@ -351,10 +351,24 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_working_time(%WorkingTime{} = working_time, attrs) do
-    working_time
-    |> WorkingTime.changeset(attrs)
-    |> Repo.update()
+  def update_working_time(id, startDate, endDate) do
+    cond do
+      is_nil(startDate) and not is_nil(endDate) and is_integer(endDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{end: endDate})
+        |> Repo.update()
+
+      is_nil(endDate) and not is_nil(startDate) and is_integer(startDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{start: startDate})
+        |> Repo.update()
+
+      not is_nil(startDate) and is_integer(endDate) and not is_nil(endDate) and
+          is_integer(endDate) ->
+        Repo.get_by(WorkingTime, id: id)
+        |> Ecto.Changeset.change(%{start: startDate, end: endDate})
+        |> Repo.update()
+    end
   end
 
   @doc """

@@ -31,10 +31,10 @@ defmodule TimeManagerWeb.WorkingTimeController do
   end
 
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do
-    working_time = Application.get_working_time!(id)
+    startDate = Map.get(working_time_params, "start")
+    endDate = Map.get(working_time_params, "end")
 
-    with {:ok, %WorkingTime{} = working_time} <-
-           Application.update_working_time(working_time, working_time_params) do
+    with {:ok, working_time} <- Application.update_working_time(id, startDate, endDate) do
       render(conn, "show.json", working_time: working_time)
     end
   end
