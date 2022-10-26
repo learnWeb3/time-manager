@@ -15,5 +15,6 @@ defmodule TimeManager.Application.User do
     user
     |> cast(attrs, [:username, :email, :password])
     |> validate_required([:username, :email, :password])
+    |> validate_format(:email, ~r/^[\w-]+@[\w-]+\.[\w]+$/)
   end
 end
