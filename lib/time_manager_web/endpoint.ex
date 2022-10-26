@@ -12,6 +12,9 @@ defmodule TimeManagerWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
+  # configure the CORS policy
+  plug Corsica, max_age: 600, origins: "*" #  ["http://foo.com", "http://bar.com"]
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

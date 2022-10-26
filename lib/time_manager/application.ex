@@ -37,6 +37,19 @@ defmodule TimeManager.Application do
 
   alias TimeManager.Application.User
 
+
+  def find_user_by_email do
+
+  end
+  def sign_in(email, password) do
+
+
+    {:ok, token, claims} = TimeManager.Application.JwtToken.generate_and_sign()
+
+    extra_claims = %{"user_id" => "some_id"}
+    token_with_default_plus_custom_claims = MyApp.Token.generate_and_sign!(extra_claims)
+  end
+
   @doc """
   Returns the list of users.
 

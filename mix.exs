@@ -48,7 +48,9 @@ defmodule TimeManager.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:postgrex, "~> 0.11"}
+      {:postgrex, "~> 0.11"},
+      {:corsica, "~> 1.2"},
+      {:joken, "~> 2.5"}
     ]
   end
 
