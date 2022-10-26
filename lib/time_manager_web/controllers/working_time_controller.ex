@@ -4,7 +4,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
   alias TimeManager.Application
   alias TimeManager.Application.WorkingTime
 
-  plug TimeManager.Plugs.Auth, "" when action in [:index]
+  plug(TimeManager.Plugs.Auth, "" when action in [:index, :create, :show, :update, :delete])
 
   action_fallback(TimeManagerWeb.FallbackController)
 
