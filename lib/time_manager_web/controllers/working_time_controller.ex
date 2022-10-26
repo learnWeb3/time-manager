@@ -6,7 +6,10 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  def index(conn, %{"userId" => userId, "start" => startDate, "end" => endDate}) do
+  def index(conn, params) do
+    userId = Map.get(params, "userId", nil)
+    startDate = Map.get(params, "start", nil)
+    endDate = Map.get(params, "end", nil)
     working_times = Application.list_working_times(userId, startDate, endDate)
     render(conn, "index.json", working_times: working_times)
   end
@@ -16,6 +19,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
     startDate = Map.get(working_time_params, "start")
     endDate = Map.get(working_time_params, "end")
     working_time = Application.create_working_time(userId, startDate, endDate)
+
     conn
     |> put_status(:created)
     |> render("show.json", working_time: working_time)
