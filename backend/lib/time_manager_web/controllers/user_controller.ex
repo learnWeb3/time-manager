@@ -14,11 +14,20 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Application.create_user(user_params) do
+    try do
+      {:ok, user} = Application.create_user(user_params)
+
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.user_path(conn, :show, user))
       |> render("show.json", user: user)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> Plug.Conn.put_status(:bad_request)
+        |> Phoenix.Controller.render(TimeManagerWeb.ErrorView, "error.json", error: error)
     end
   end
 

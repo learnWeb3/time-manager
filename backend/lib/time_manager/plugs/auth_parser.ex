@@ -1,9 +1,5 @@
-defmodule JWTMissingTokenError do
-  defexception message:
-                 "Invalid or missing JWT token, you must be logged in to access this resource"
-end
-
 defmodule TimeManager.Plugs.Auth do
+
   def init(default), do: default
 
   def call(%Plug.Conn{} = conn, _default) do

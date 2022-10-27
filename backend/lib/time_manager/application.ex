@@ -106,13 +106,21 @@ defmodule TimeManager.Application do
 
   """
   def create_user(attrs \\ %{}) do
-    plain_text_password = Map.get(attrs, "password")
-    %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
-    attrs = Map.put(attrs, "password", hashed_password)
+    email = Map.get(attrs, "email")
 
-    %User{}
-    |> User.changeset(attrs)
-    |> Repo.insert()
+    user_with_email = Repo.get_by(User, email: email)
+
+    if is_nil(user_with_email) do
+      plain_text_password = Map.get(attrs, "password")
+      %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
+      attrs = Map.put(attrs, "password", hashed_password)
+
+      %User{}
+      |> User.changeset(attrs)
+      |> Repo.insert()
+    else
+      raise UniqueConstraintError
+    end
   end
 
   @doc """
