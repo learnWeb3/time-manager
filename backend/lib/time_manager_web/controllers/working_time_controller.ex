@@ -33,8 +33,9 @@ defmodule TimeManagerWeb.WorkingTimeController do
   end
 
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do
-    startDate = Map.get(working_time_params, "start")
-    endDate = Map.get(working_time_params, "end")
+    {id, ""} = Integer.parse(id)
+    startDate = Map.get(working_time_params, "start", nil)
+    endDate = Map.get(working_time_params, "end", nil)
 
     with {:ok, working_time} <- Application.update_working_time(id, startDate, endDate) do
       render(conn, "show.json", working_time: working_time)

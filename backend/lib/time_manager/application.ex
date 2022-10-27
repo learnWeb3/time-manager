@@ -190,7 +190,6 @@ defmodule TimeManager.Application do
       |> User.changeset(attrs)
       |> Repo.update()
     end
-
   end
 
   @doc """
@@ -449,22 +448,25 @@ defmodule TimeManager.Application do
 
   """
   def update_working_time(id, startDate, endDate) do
+    IO.inspect(id)
+    IO.inspect(startDate)
+    IO.inspect(endDate)
+
+    working_time = Repo.get_by(WorkingTime, id: id)
+
     cond do
       is_nil(startDate) and not is_nil(endDate) and is_integer(endDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{end: endDate})
-        |> Repo.update()
+        changeset = WorkingTime.changeset(working_time, %{end: endDate})
+        Repo.update(changeset)
 
       is_nil(endDate) and not is_nil(startDate) and is_integer(startDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{start: startDate})
-        |> Repo.update()
+        changeset = WorkingTime.changeset(working_time, %{start: startDate})
+        Repo.update(changeset)
 
       not is_nil(startDate) and is_integer(endDate) and not is_nil(endDate) and
           is_integer(endDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{start: startDate, end: endDate})
-        |> Repo.update()
+        changeset = WorkingTime.changeset(working_time, %{start: startDate, end: endDate})
+        Repo.update(changeset)
     end
   end
 
