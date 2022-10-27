@@ -3,8 +3,11 @@ defmodule TimeManager.Application.WorkingTime do
   import Ecto.Changeset
 
   schema "working_times" do
-    field(:end, :integer)
-    field(:start, :integer)
+    field(:weekday, :integer)
+    field(:endhour, :integer)
+    field(:starthour, :integer)
+    field(:endminute, :integer)
+    field(:startminute, :integer)
     belongs_to(:user, TimeManager.Application.User)
 
     timestamps()
@@ -13,8 +16,8 @@ defmodule TimeManager.Application.WorkingTime do
   @doc false
   def changeset(working_time, attrs) do
     working_time
-    |> cast(attrs, [:start, :end, :user_id])
+    |> cast(attrs, [:weekday, :starthour, :endhour, :startminute, :endminute, :user_id])
     |> cast_assoc(:user)
-    |> validate_required([:start, :end])
+    |> validate_required([:weekday, :starthour, :endhour, :startminute, :endminute])
   end
 end
