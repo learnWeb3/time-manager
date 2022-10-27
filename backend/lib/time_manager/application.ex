@@ -423,16 +423,21 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_working_time(userId, startDate, endDate) do
+  def create_working_time(userId, working_time_params) do
     user = get_user!(userId)
 
     working_time = %WorkingTime{
-      user: user,
-      start: startDate,
-      end: endDate
+      user: user
     }
 
-    Repo.insert!(working_time)
+    changeset = WorkingTime.changeset(working_time, working_time_params)
+
+    if changeset.valid? do
+      Repo.insert!(changeset)
+    else
+      raise ValidationError,
+        message: "Invalid parameters: " <> changeset_error_to_string(changeset)
+    end
   end
 
   @doc """
@@ -447,27 +452,10 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_working_time(id, startDate, endDate) do
-    IO.inspect(id)
-    IO.inspect(startDate)
-    IO.inspect(endDate)
-
+  def update_working_time(id, working_time_params) do
     working_time = Repo.get_by(WorkingTime, id: id)
-
-    cond do
-      is_nil(startDate) and not is_nil(endDate) and is_integer(endDate) ->
-        changeset = WorkingTime.changeset(working_time, %{end: endDate})
-        Repo.update(changeset)
-
-      is_nil(endDate) and not is_nil(startDate) and is_integer(startDate) ->
-        changeset = WorkingTime.changeset(working_time, %{start: startDate})
-        Repo.update(changeset)
-
-      not is_nil(startDate) and is_integer(endDate) and not is_nil(endDate) and
-          is_integer(endDate) ->
-        changeset = WorkingTime.changeset(working_time, %{start: startDate, end: endDate})
-        Repo.update(changeset)
-    end
+    changeset = WorkingTime.changeset(working_time, working_time_params)
+    Repo.update(changeset)
   end
 
   @doc """
@@ -497,5 +485,17 @@ defmodule TimeManager.Application do
   """
   def change_working_time(%WorkingTime{} = working_time, attrs \\ %{}) do
     WorkingTime.changeset(working_time, attrs)
+  end
+
+  def changeset_error_to_string(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.reduce("", fn {k, v}, acc ->
+      joined_errors = Enum.join(v, "; ")
+      "#{acc}#{k}: #{joined_errors}, "
+    end)
   end
 end

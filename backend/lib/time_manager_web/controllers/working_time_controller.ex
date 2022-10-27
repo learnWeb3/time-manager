@@ -17,14 +17,21 @@ defmodule TimeManagerWeb.WorkingTimeController do
   end
 
   def create(conn, %{"userId" => userId, "working_time" => working_time_params}) do
-    {userId, ""} = Integer.parse(userId)
-    startDate = Map.get(working_time_params, "start")
-    endDate = Map.get(working_time_params, "end")
-    working_time = Application.create_working_time(userId, startDate, endDate)
+    try do
+      {userId, ""} = Integer.parse(userId)
+      working_time = Application.create_working_time(userId, working_time_params)
 
-    conn
-    |> put_status(:created)
-    |> render("show.json", working_time: working_time)
+      conn
+      |> put_status(:created)
+      |> render("show.json", working_time: working_time)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> Plug.Conn.put_status(:bad_request)
+        |> Phoenix.Controller.render(TimeManagerWeb.ErrorView, "error.json", error: error)
+    end
   end
 
   def show(conn, %{"id" => id}) do
@@ -34,10 +41,8 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do
     {id, ""} = Integer.parse(id)
-    startDate = Map.get(working_time_params, "start", nil)
-    endDate = Map.get(working_time_params, "end", nil)
 
-    with {:ok, working_time} <- Application.update_working_time(id, startDate, endDate) do
+    with {:ok, working_time} <- Application.update_working_time(id, working_time_params) do
       render(conn, "show.json", working_time: working_time)
     end
   end

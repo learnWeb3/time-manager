@@ -32,7 +32,7 @@
           'Elixir.TimeManagerWeb.UserView',
           'Elixir.TimeManagerWeb.WorkingTimeController',
           'Elixir.TimeManagerWeb.WorkingTimeView',
-          'Elixir.UniqueConstraintError']},
+          'Elixir.UniqueConstraintError','Elixir.ValidationError']},
      {registered,[]},
      {vsn,"0.1.0"},
      {mod,{'Elixir.TimeManager.Application',[]}}]}.

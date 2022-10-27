@@ -10,3 +10,7 @@ end
 defmodule UniqueConstraintError do
   defexception message: "ressource already exists"
 end
+
+defmodule ValidationError do
+  defexception message: "invalid parameters: "
+end
