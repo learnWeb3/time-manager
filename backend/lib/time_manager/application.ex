@@ -252,11 +252,24 @@ defmodule TimeManager.Application do
   """
   def get_clock!(id), do: Repo.get!(Clock, id)
 
-  def get_user_clocks(userId) do
-    query =
-      from(clock in Clock, where: clock.user_id == ^userId, order_by: [desc: clock.inserted_at])
+  def get_user_clocks(params) do
+    userId = Map.get(params, "userId", nil)
+    working_time_id = Map.get(params, "working_time_id", nil)
 
-    Repo.all(query)
+    if is_nil(working_time_id) do
+      query =
+        from(clock in Clock, where: clock.user_id == ^userId, order_by: [desc: clock.inserted_at])
+
+      Repo.all(query)
+    else
+      query =
+        from(clock in Clock,
+          where: clock.user_id == ^userId and clock.working_time_id == ^working_time_id,
+          order_by: [desc: clock.inserted_at]
+        )
+
+      Repo.all(query)
+    end
   end
 
   @doc """

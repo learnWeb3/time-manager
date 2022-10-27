@@ -18,8 +18,8 @@ defmodule TimeManagerWeb.ClockController do
     |> render("show.json", clock: clock)
   end
 
-  def user_clocks(conn, %{"userId" => userId}) do
-    user_clocks = Application.get_user_clocks(userId)
+  def user_clocks(conn, params) do
+    user_clocks = Application.get_user_clocks(params)
     render(conn, "index.json", clocks: user_clocks)
   end
 end
