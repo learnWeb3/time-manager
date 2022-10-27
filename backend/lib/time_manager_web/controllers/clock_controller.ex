@@ -19,7 +19,16 @@ defmodule TimeManagerWeb.ClockController do
   end
 
   def user_clocks(conn, params) do
-    user_clocks = Application.get_user_clocks(params)
-    render(conn, "index.json", clocks: user_clocks)
+    try do
+      user_clocks = Application.get_user_clocks(params)
+      render(conn, "index.json", clocks: user_clocks)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
+    end
   end
 end

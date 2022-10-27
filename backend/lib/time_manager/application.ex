@@ -131,7 +131,15 @@ defmodule TimeManager.Application do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    user = Repo.get(User, id)
+
+    if is_nil(user) do
+      raise NotFoundError, message: "user not found for user with id " <> id
+    else
+      user
+    end
+  end
 
   @doc """
   Creates a user.
@@ -254,21 +262,30 @@ defmodule TimeManager.Application do
 
   def get_user_clocks(params) do
     userId = Map.get(params, "userId", nil)
-    working_time_id = Map.get(params, "working_time_id", nil)
+    user = Repo.get_by(User, id: userId)
 
-    if is_nil(working_time_id) do
-      query =
-        from(clock in Clock, where: clock.user_id == ^userId, order_by: [desc: clock.inserted_at])
-
-      Repo.all(query)
+    if is_nil(user) do
+      raise NotFoundError, message: "user not found for user with id " <> userId
     else
-      query =
-        from(clock in Clock,
-          where: clock.user_id == ^userId and clock.working_time_id == ^working_time_id,
-          order_by: [desc: clock.inserted_at]
-        )
+      working_time_id = Map.get(params, "working_time_id", nil)
 
-      Repo.all(query)
+      if is_nil(working_time_id) do
+        query =
+          from(clock in Clock,
+            where: clock.user_id == ^userId,
+            order_by: [desc: clock.inserted_at]
+          )
+
+        Repo.all(query)
+      else
+        query =
+          from(clock in Clock,
+            where: clock.user_id == ^userId and clock.working_time_id == ^working_time_id,
+            order_by: [desc: clock.inserted_at]
+          )
+
+        Repo.all(query)
+      end
     end
   end
 
