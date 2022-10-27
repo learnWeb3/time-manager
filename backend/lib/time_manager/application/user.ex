@@ -4,6 +4,7 @@ defmodule TimeManager.Application.User do
 
   schema "users" do
     field :email, :string
+    field :jobtitle, :string
     field :username, :string
     field :password, :string
 
