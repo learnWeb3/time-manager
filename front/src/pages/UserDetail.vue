@@ -34,6 +34,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import LeftMenu from "src/components/LeftMenu.vue";
+import { useGlobalStore } from 'stores/global';
 
 export default defineComponent({
   name: "UserDetail",
@@ -44,9 +45,11 @@ export default defineComponent({
 
   setup() {
     const leftDrawerOpen = ref(false);
+    const store = useGlobalStore();
 
     return {
       leftDrawerOpen,
+      store,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
