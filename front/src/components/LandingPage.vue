@@ -31,6 +31,7 @@
         hide-selected
         hide-dropdown-icon
         fill-input
+        option-label="username"
         input-debounce="0"
         :options="options"
         @update:model-value="ActiveUser()"
@@ -54,11 +55,11 @@ import { defineComponent, ref } from "vue";
 import { useGlobalStore } from "stores/global";
 
 const stringOptions = [
-  {label: "Samuel Cadau", value: "Full-stack"},
-  {label: "Antoine Le-Guillou", value: "Full-stack2"},
-  {label: "Mohamed Lahcen", value: "Full-stack3"},
-  {label: "Charlène Obadia", value: "Full-stack4"},
-  {label: "Serge le bidon", value: "Full-stack5"},
+  {username: "Samuel Cadau", email: "test@gmail.com", profession: "Full-stack"},
+  {username: "Antoine Le-Guillou", email: "test@gmail.com", profession: "Full-stack2"},
+  {username: "Mohamed Lahcen", email: "test@gmail.com", profession: "Full-stack3"},
+  {username: "Charlène Obadia", email: "test@gmail.com", profession: "Full-stack4"},
+  {username: "Serge le bidon", email: "test@gmail.com", profession: "Full-stack5"},
 ]
 
 export default defineComponent({
@@ -77,7 +78,7 @@ export default defineComponent({
         update(() => {
           const needle = val.toLocaleLowerCase();
           options.value = stringOptions.filter(
-            (v) => v.label.toLocaleLowerCase().indexOf(needle) > -1
+            (v) => v.username.toLocaleLowerCase().indexOf(needle) > -1
           );
         });
       },
