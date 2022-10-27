@@ -8,9 +8,10 @@ defmodule TimeManagerWeb.ClockController do
 
   def create(conn, %{"userId" => userId, "clock" => clock_params}) do
     {userId, ""} = Integer.parse(userId)
-    time = Map.get(clock_params, "time")
+    time = Map.get(clock_params, "time", nil)
     status = Map.get(clock_params, "status", true)
-    clock = Application.create_clock(userId, time, status)
+    working_time_id = Map.get(clock_params, "working_time_id", nil)
+    clock = Application.create_clock(userId, time, status, working_time_id)
 
     conn
     |> put_status(:created)

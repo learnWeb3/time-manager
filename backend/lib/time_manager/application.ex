@@ -271,13 +271,15 @@ defmodule TimeManager.Application do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_clock(userId, time, status) do
+  def create_clock(userId, time, status, working_time_id) do
+    working_time = get_working_time!(working_time_id)
     user = get_user!(userId)
 
     clock = %Clock{
       user: user,
       time: time,
-      status: status
+      status: status,
+      working_time: working_time
     }
 
     Repo.insert!(clock)
