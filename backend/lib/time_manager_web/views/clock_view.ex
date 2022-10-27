@@ -15,7 +15,8 @@ defmodule TimeManagerWeb.ClockView do
       id: clock.id,
       time: clock.time,
       status: clock.status,
-      user_id: clock.user_id
+      user_id: clock.user_id,
+      working_time_id: clock.working_time_id
     }
   end
 end
