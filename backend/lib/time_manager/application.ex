@@ -73,8 +73,48 @@ defmodule TimeManager.Application do
       [%User{}, ...]
 
   """
-  def list_users do
-    Repo.all(User)
+  def list_users(params) do
+    email = Map.get(params, "email", nil)
+    username = Map.get(params, "username", nil)
+
+    cond do
+      is_nil(email) and is_nil(username) ->
+        query =
+          from(user in User,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+
+      is_nil(email) and not is_nil(username) ->
+        query =
+          from(user in User,
+            where: user.username == ^username,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+
+      not is_nil(email) and is_nil(username) ->
+        query =
+          from(user in User,
+            where: user.email == ^email,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+
+      not is_nil(email) and not is_nil(username) ->
+        query =
+          from(user in User,
+            where:
+              user.email == ^email and
+                user.username == ^username,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+    end
   end
 
   @doc """
@@ -136,9 +176,21 @@ defmodule TimeManager.Application do
 
   """
   def update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
+    plain_text_password = Map.get(attrs, "password", nil)
+
+    if not is_nil(plain_text_password) do
+      %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
+      attrs = Map.put(attrs, "password", hashed_password)
+
+      user
+      |> User.changeset(attrs)
+      |> Repo.update()
+    else
+      user
+      |> User.changeset(attrs)
+      |> Repo.update()
+    end
+
   end
 
   @doc """
