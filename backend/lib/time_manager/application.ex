@@ -202,7 +202,9 @@ defmodule TimeManager.Application do
   def get_clock!(id), do: Repo.get!(Clock, id)
 
   def get_user_clocks(userId) do
-    query = from(clock in Clock, where: clock.user_id == ^userId)
+    query =
+      from(clock in Clock, where: clock.user_id == ^userId, order_by: [desc: clock.inserted_at])
+
     Repo.all(query)
   end
 
@@ -293,7 +295,8 @@ defmodule TimeManager.Application do
       is_nil(startDate) and is_nil(endDate) ->
         query =
           from(workingtime in WorkingTime,
-            where: workingtime.user_id == ^userId
+            where: workingtime.user_id == ^userId,
+            order_by: [desc: workingtime.inserted_at]
           )
 
         Repo.all(query)
@@ -305,7 +308,8 @@ defmodule TimeManager.Application do
           from(workingtime in WorkingTime,
             where:
               workingtime.user_id == ^userId and
-                workingtime.end >= ^endDate
+                workingtime.end >= ^endDate,
+            order_by: [desc: workingtime.inserted_at]
           )
 
         Repo.all(query)
@@ -317,7 +321,8 @@ defmodule TimeManager.Application do
           from(workingtime in WorkingTime,
             where:
               workingtime.user_id == ^userId and
-                workingtime.start >= ^startDate
+                workingtime.start >= ^startDate,
+            order_by: [desc: workingtime.inserted_at]
           )
 
         Repo.all(query)
@@ -331,7 +336,8 @@ defmodule TimeManager.Application do
             where:
               workingtime.user_id == ^userId and
                 workingtime.start >= ^startDate and
-                workingtime.end >= ^endDate
+                workingtime.end >= ^endDate,
+            order_by: [desc: workingtime.inserted_at]
           )
 
         Repo.all(query)
