@@ -1,5 +1,6 @@
 backend/deps
 backend/_build
+backend/data
 deps
 _build
 
