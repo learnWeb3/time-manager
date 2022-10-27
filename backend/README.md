@@ -1,4 +1,12 @@
-# TimeManager
+# TimeManager (backend)
+
+## API documentation
+
+https://documenter.getpostman.com/view/13953520/2s8YCjDXs6
+
+## Quick start
+
+### It is your first project installation
 
 To start your Phoenix server:
 
@@ -6,9 +14,15 @@ To start your Phoenix server:
   * Create and migrate your database with `mix ecto.setup`
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+### It is not the first project installation
+
+To start your Phoenix server:
+
+  * Reset the database with `mix ecto.reset`
+  * Check your migration status with `mix phx.routes`
+  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+
 
 ## Learn more
 
