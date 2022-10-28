@@ -56,7 +56,11 @@ defmodule TimeManager.Application do
   end
 
   def sign_in(email, password) do
-    user = Repo.get_by!(User, email: email)
+    user = Repo.get_by(User, email: email)
+
+    if is_nil(user) do
+      raise NotFoundError, message: "invalid credentials"
+    end
 
     check = verify_user(password, user.password)
 
@@ -64,7 +68,7 @@ defmodule TimeManager.Application do
       extra_claims = %{"sub" => user.id}
       TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
     else
-      nil
+      raise ValidationError, message: "invalid credentials"
     end
   end
 
@@ -157,7 +161,26 @@ defmodule TimeManager.Application do
     end
   end
 
-  def delete_user(%User{} = user) do
+  def delete_user(id) do
+    user = Repo.get(User, id)
+    # check for relations existences to send proper errors
+    # - working_times
+
+    query =
+      from(working_time in WorkingTime,
+        where: working_time.user_id == ^id
+      )
+
+    user_working_times = Repo.all(query)
+
+    if Kernel.length(user_working_times) > 0 do
+      raise ValidationError, message: "user possess working_times and thus can not be deleted"
+    end
+
+    if is_nil(user) do
+      raise NotFoundError, message: "user does not exists with id " <> id
+    end
+
     Repo.delete(user)
   end
 
@@ -282,6 +305,7 @@ defmodule TimeManager.Application do
 
   def get_working_time!(id) do
     working_time = Repo.get(WorkingTime, id)
+
     if is_nil(working_time) do
       raise NotFoundError, message: "working time does not exists using id " <> id
     end
@@ -326,7 +350,16 @@ defmodule TimeManager.Application do
     Repo.insert!(new_working_time)
   end
 
-  def delete_working_time(%WorkingTime{} = working_time) do
+  def delete_working_time(id) do
+    # check for relations existences to send proper errors
+    # - schedule
+
+    working_time = Repo.get(WorkingTime, id)
+
+    if is_nil(working_time) do
+      raise NotFoundError, message: "working time does not exists using id" <> id
+    end
+
     Repo.delete(working_time)
   end
 
@@ -406,6 +439,19 @@ defmodule TimeManager.Application do
 
     if is_nil(schedule) do
       raise NotFoundError, message: "schedule does not exists using id " <> id
+    end
+
+    # check relations existence to send proper messages
+    query =
+      from(working_time in WorkingTime,
+        where: working_time.schedule_id == ^id
+      )
+
+    schedule_working_times = Repo.all(query)
+
+    if Kernel.length(schedule_working_times) > 0 do
+      raise ValidationError,
+        message: "schedule possess related working times and thus can not be deleted"
     end
 
     Repo.delete(schedule)

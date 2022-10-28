@@ -35,8 +35,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   def delete(conn, %{"id" => id}) do
     try do
-      working_time = Application.get_working_time!(id)
-      {:ok, %WorkingTime{}} = Application.delete_working_time(working_time)
+      Application.delete_working_time(id)
       send_resp(conn, :no_content, "")
     rescue
       e ->
