@@ -37,7 +37,7 @@
       style="min-height: 100vh"
     >
       <q-step :name="1" title="User Detail" :done="store.step > 1">
-        <div class="col-12 row justify-center q-mx-xl q-my-md">
+        <div class="col-12 row justify-center q-mx-xl q-my-xl">
           <div class="col-10 row">
             <div class="col-12">
               <span

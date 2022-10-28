@@ -1,12 +1,12 @@
 <template>
   <div class="row col-12 q-mt-sm">
-    <div class="col-12 flex justify-center">
+    <div :class="store.step === 3 ? 'col-12 flex justify-center q-mt-xl' : 'col-12 flex justify-center'">
       <q-avatar size="125px">
         <img src="https://cdn.quasar.dev/img/avatar.png" />
       </q-avatar>
     </div>
     <div class="col-12 flex q-mt-sm justify-center">
-      <span style="font-size: 1.3em; color: #0a1128">{{ store.user.value }}</span>
+      <span style="font-size: 1.3em; color: #0a1128">{{ store.step === 3 ? 'Manager' : store.user.value }}</span>
     </div>
     <div class="col-12 flex q-mt-xl justify-center">
       <q-btn :outline="store.menu === 'User Detail' ? false : true" rounded size="md" unelevated :style="store.menu === 'User Detail' ? 'background-color: #1282A2; color: white' : 'color: #1282A2'" label="User Detail" @click="store.menu = 'User Detail', store.stepUser = 1" />

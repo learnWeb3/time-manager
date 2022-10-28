@@ -6,7 +6,7 @@
       >
     </div>
     <div class="col-12 q-mt-xl flex justify-center">
-      <q-btn size="xl" unelevated color="primary" label="Create User">
+      <q-btn size="xl" unelevated color="primary" label="Create User" @click="store.dialog = true">
         <template v-slot:default>
           <q-icon
             style="color: white"
@@ -15,9 +15,10 @@
           />
         </template>
       </q-btn>
+      <CreateUser />
     </div>
     <div class="col-12 q-mt-lg flex justify-center">
-      <q-btn size="xl" unelevated color="primary" label="Show Users">
+      <q-btn size="xl" unelevated color="primary" label="Show Users" @click="store.step = 3">
         <template v-slot:default>
           <q-icon color="white" class="q-pl-sm" name="img:icons/people.png" />
         </template>
@@ -53,6 +54,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { useGlobalStore } from "stores/global";
+import CreateUser from "src/components/CreateUser.vue";
 
 const stringOptions = [
   {username: "Samuel Cadau", email: "test@gmail.com", profession: "Full-stack"},
@@ -90,5 +92,8 @@ export default defineComponent({
       this.store.step = 2;
     }
   },
+  components: {
+    CreateUser,
+  }
 });
 </script>

@@ -8,6 +8,13 @@ export const useGlobalStore = defineStore("global", {
     userEdit: true,
     inputEdit: false,
     stepUser: 1,
+    dialog: false,
+    createUser: {
+      username: "",
+      email: "",
+      profession: "",
+    },
+    selectedUser: null
   }),
   getters: {},
   actions: {},
