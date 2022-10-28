@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+# Initialize the secret used to encode JWT token to serve authentication purposes
+config :joken, default_signer: "jwt-secret"
+
 config :time_manager,
   ecto_repos: [TimeManager.Repo]
 
