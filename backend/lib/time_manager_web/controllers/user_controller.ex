@@ -32,23 +32,45 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = Application.get_user!(id)
-    render(conn, "show.json", user: user)
+    try do
+      user = Application.get_user!(id)
+      render(conn, "show.json", user: user)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
+    end
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Application.get_user!(id)
-
-    with {:ok, %User{} = user} <- Application.update_user(user, user_params) do
+    try do
+      user = Application.get_user!(id)
+      {:ok, user} = Application.update_user(user, user_params)
       render(conn, "show.json", user: user)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    user = Application.get_user!(id)
-
-    with {:ok, %User{}} <- Application.delete_user(user) do
+    try do
+      Application.delete_user(id)
       send_resp(conn, :no_content, "")
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
     end
   end
 end
