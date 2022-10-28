@@ -100,7 +100,9 @@
                         round
                         style="color: #001f54"
                         icon="edit"
-                        @click="store.selectedUser = props.row, dialog = true"
+                        @click="
+                          (store.selectedUser = props.row), (dialog = true)
+                        "
                       />
                       <q-btn flat round color="negative" icon="delete" />
                     </q-td>
@@ -170,7 +172,38 @@
           </div>
         </div>
       </q-step>
-      <q-step :name="2" title="Dashboard" :done="store.step > 2"> </q-step>
+      <q-step :name="2" title="Dashboard" :done="store.step > 2">
+        <div class="col-12 q-px-xl q-my-md">
+          <div class="row">
+            <div class="col-2 row q-mt-md">
+              <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Dashboard</span>
+            </div>
+            <div class="col-4 row q-mt-md justify-between justify-center">
+              <div class="col-4 flex justify-center">
+                <q-btn :outline="store.menu === 'Weekly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Weekly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Weekly" @click="store.menu = 'Weekly', store.stepUser = 2"/>
+              </div>
+              <div class="col-4 flex justify-center">
+                <q-btn :outline="store.menu === 'Monthly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Monthly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Monthly" @click="store.menu = 'Monthly', store.stepUser = 2"/>
+              </div>
+              <div class="col-4 flex justify-center">
+                <q-btn :outline="store.menu === 'Yearly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Yearly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Yearly" @click="store.menu = 'Yearly', store.stepUser = 2"/>
+              </div>
+              
+            </div>
+          </div>
+
+          <div class="col-12 row q-mt-md">
+            <div class="col-12 q-mt-md ">
+              <BarChart />
+            </div>
+            <div class="col-12 q-mt-md">
+              <PieChart />
+            </div>
+          </div>
+          <div class="col-12 q-mt-md row ">
+            <LineChart />
+          </div>
+        </div></q-step>
     </q-stepper>
   </div>
 </template>
@@ -179,6 +212,9 @@
 import { defineComponent, ref } from "vue";
 import { useGlobalStore } from "stores/global";
 import LeftMenu from "components/LeftMenu.vue";
+import BarChart from "src/components/Charts/BarChart.vue";
+import LineChart from "src/components/Charts/LineChart.vue";
+import PieChart from "src/components/Charts/PieChart.vue";
 
 const columns = [
   {
@@ -253,6 +289,9 @@ export default defineComponent({
   },
   components: {
     LeftMenu,
+    BarChart,
+    LineChart,
+    PieChart,
   },
 });
 </script>

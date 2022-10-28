@@ -115,7 +115,7 @@
         </div>
       </q-step>
       <q-step :name="2" title="Dashboard" :done="store.step > 2">
-        <div class="col-12 q-mx-xl q-my-md">
+        <div class="col-12 q-px-xl q-my-md">
           <div class="row">
             <div class="col-2 row q-mt-md">
               <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Dashboard</span>
@@ -135,14 +135,14 @@
           </div>
 
           <div class="col-12 row q-mt-md">
-            <div class="col-6 ">
+            <div class="col-12 q-mt-md ">
               <BarChart />
             </div>
-            <div class="col-6">
+            <div class="col-12 q-mt-md">
               <PieChart />
             </div>
           </div>
-          <div class="col-12 row ">
+          <div class="col-12 q-mt-md row ">
             <LineChart />
           </div>
         </div>
