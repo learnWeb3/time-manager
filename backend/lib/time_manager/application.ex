@@ -208,7 +208,9 @@ defmodule TimeManager.Application do
       if is_nil(working_time_id) do
         query =
           from(clock in Clock,
-            where: clock.user_id == ^userId,
+            join: working_time in WorkingTime,
+            on: working_time.id == clock.working_time_id,
+            where: working_time.user_id == ^userId,
             order_by: [desc: clock.inserted_at]
           )
 
@@ -216,7 +218,9 @@ defmodule TimeManager.Application do
       else
         query =
           from(clock in Clock,
-            where: clock.user_id == ^userId and clock.working_time_id == ^working_time_id,
+            join: working_time in WorkingTime,
+            on: working_time.id == clock.working_time_id,
+            where: working_time.user_id == ^userId and clock.working_time_id == ^working_time_id,
             order_by: [desc: clock.inserted_at]
           )
 
