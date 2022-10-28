@@ -332,9 +332,9 @@ defmodule TimeManager.Application do
         order_by: [desc: working_time.inserted_at]
       )
 
-    working_time = Repo.all(query)
+    working_times = Repo.all(query)
 
-    if not is_nil(working_time) do
+    if Kernel.length(working_times) > 0 do
       raise ValidationError,
         message:
           "user with id " <>
@@ -347,7 +347,8 @@ defmodule TimeManager.Application do
       schedule: schedule
     }
 
-    Repo.insert!(new_working_time)
+    {:ok, new_working_time} = Repo.insert(new_working_time)
+    new_working_time
   end
 
   def delete_working_time(id) do
