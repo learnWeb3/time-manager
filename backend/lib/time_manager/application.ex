@@ -44,10 +44,39 @@ defmodule TimeManager.Application do
 
   # ========= PRSENCE ===========
 
+  def get_unix_current_time do
+    {:ok, current_datetime} = DateTime.now("Etc/UTC")
+    DateTime.to_unix(current_datetime, :second)
+  end
+
+  def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
+    # add a tuple {unix_datetime, userId} if user is still working (has not left yet)
+    if Kernel.length(departure_sums) < Kernel.length(arrival_sums) do
+      {_arrival_sum, userId} = List.first(arrival_sums)
+      # slow - check for impact to prepend instead of append as ++ has a 0(n) complexity
+      unix_datetime = get_unix_current_time()
+      IO.inspect(unix_datetime)
+      departure_sums = departure_sums ++ [{unix_datetime, userId}]
+
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    else
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    end
+  end
+
   def get_presence(params) do
     userId = Map.get(params, "userId", nil)
-    {:ok, current_datetime} = DateTime.now("Etc/UTC")
-    unix_datetime = DateTime.to_unix(current_datetime, :second)
+    unix_datetime = get_unix_current_time()
     year_in_seconds = 365 * 24 * 60 * 60
     startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
     # default to current datetime in seconds
@@ -81,12 +110,7 @@ defmodule TimeManager.Application do
 
       arrival_sums = Repo.all(arrival_time_sum_query)
 
-      Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId} = departure_sum
-        {arrival_sum, userId} = Enum.at(arrival_sums, index)
-
-        %{duration: departure_sum - arrival_sum, user_id: userId}
-      end)
+      calculate_presence_duration_from_sums(departure_sums, arrival_sums)
     else
       departure_time_sum_query =
         from(clock in Clock,
@@ -116,12 +140,7 @@ defmodule TimeManager.Application do
 
       arrival_sums = Repo.all(arrival_time_sum_query)
 
-      Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId} = departure_sum
-        {arrival_sum, userId} = Enum.at(arrival_sums, index)
-
-        %{duration: departure_sum - arrival_sum, user_id: userId}
-      end)
+      calculate_presence_duration_from_sums(departure_sums, arrival_sums)
     end
   end
 
