@@ -26,7 +26,8 @@ defmodule TimeManagerWeb.Router do
     post "/workingtimes/:userId", WorkingTimeController, :create
     delete "/workingtimes/:id", WorkingTimeController, :delete
     resources "/schedules", ScheduleController
-    post "/clocks", ClockController, :create
+    post "/clocks/:userId", ClockController, :create
+    get "/clocks/presence", ClockController, :presence
     get "/clocks/:userId", ClockController, :user_clocks
     post "/sessions/login", SessionController, :login
   end

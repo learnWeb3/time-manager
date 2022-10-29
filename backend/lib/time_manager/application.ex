@@ -42,6 +42,89 @@ defmodule TimeManager.Application do
   alias TimeManager.Application.Clock
   alias TimeManager.Application.WorkingTime
 
+  # ========= PRSENCE ===========
+
+  def get_presence(params) do
+    userId = Map.get(params, "userId", nil)
+    {:ok, current_datetime} = DateTime.now("Etc/UTC")
+    unix_datetime = DateTime.to_unix(current_datetime, :second)
+    year_in_seconds = 365 * 24 * 60 * 60
+    startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
+    # default to current datetime in seconds
+    endDate = Map.get(params, "end", unix_datetime)
+
+    startDatetime = DateTime.to_naive(DateTime.from_unix!(startDate))
+    endDatetime = DateTime.to_naive(DateTime.from_unix!(endDate))
+
+    if is_nil(userId) do
+      departure_time_sum_query =
+        from(clock in Clock,
+          select: {sum(clock.time), clock.user_id},
+          where:
+            clock.status == false and
+              clock.inserted_at >= ^startDatetime and
+              clock.inserted_at <= ^endDatetime,
+          group_by: clock.user_id
+        )
+
+      departure_sums = Repo.all(departure_time_sum_query)
+
+      arrival_time_sum_query =
+        from(clock in Clock,
+          select: {sum(clock.time), clock.user_id},
+          where:
+            clock.status == true and
+              clock.inserted_at >= ^startDatetime and
+              clock.inserted_at <= ^endDatetime,
+          group_by: clock.user_id
+        )
+
+      arrival_sums = Repo.all(arrival_time_sum_query)
+
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    else
+      departure_time_sum_query =
+        from(clock in Clock,
+          select: {sum(clock.time), clock.user_id},
+          where:
+            clock.user_id ==
+              ^userId and
+              clock.status == false and
+              clock.inserted_at >= ^startDatetime and
+              clock.inserted_at <= ^endDatetime,
+          group_by: clock.user_id
+        )
+
+      departure_sums = Repo.all(departure_time_sum_query)
+
+      arrival_time_sum_query =
+        from(clock in Clock,
+          select: {sum(clock.time), clock.user_id},
+          where:
+            clock.user_id ==
+              ^userId and
+              clock.status == true and
+              clock.inserted_at >= ^startDatetime and
+              clock.inserted_at <= ^endDatetime,
+          group_by: clock.user_id
+        )
+
+      arrival_sums = Repo.all(arrival_time_sum_query)
+
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    end
+  end
+
   # =========  USERS ============
   def encode_password(password) do
     Bcrypt.Base.hash_password(password, Bcrypt.Base.gen_salt(12, true))
@@ -52,7 +135,12 @@ defmodule TimeManager.Application do
   end
 
   def verify_token(bearer_token) do
-    TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+    try do
+      TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+    rescue
+      _e ->
+        raise JWTMissingTokenError
+    end
   end
 
   def sign_in(email, password) do
@@ -203,51 +291,57 @@ defmodule TimeManager.Application do
     if is_nil(user) do
       raise NotFoundError, message: "user not found for user with id " <> userId
     else
-      working_time_id = Map.get(params, "working_time_id", nil)
+      query =
+        from(clock in Clock,
+          where: clock.user_id == ^userId,
+          order_by: [desc: clock.inserted_at]
+        )
 
-      if is_nil(working_time_id) do
-        query =
-          from(clock in Clock,
-            join: working_time in WorkingTime,
-            on: working_time.id == clock.working_time_id,
-            where: working_time.user_id == ^userId,
-            order_by: [desc: clock.inserted_at]
-          )
-
-        Repo.all(query)
-      else
-        query =
-          from(clock in Clock,
-            join: working_time in WorkingTime,
-            on: working_time.id == clock.working_time_id,
-            where: working_time.user_id == ^userId and clock.working_time_id == ^working_time_id,
-            order_by: [desc: clock.inserted_at]
-          )
-
-        Repo.all(query)
-      end
+      Repo.all(query)
     end
   end
 
-  def create_clock(clock_params) do
+  def get_user_last_clocks(userId, limit) do
+    query =
+      from(clock in Clock,
+        where: clock.user_id == ^userId,
+        order_by: [desc: clock.inserted_at],
+        limit: ^limit
+      )
+
+    Repo.all(query)
+  end
+
+  def create_clock(userId, clock_params) do
     time = Map.get(clock_params, "time", nil)
-    status = Map.get(clock_params, "status", true)
-    working_time_id = Map.get(clock_params, "working_time_id", nil)
+    user = Repo.get(User, userId)
 
-    working_time = Repo.get(WorkingTime, working_time_id)
-
-    if is_nil(working_time) do
+    if is_nil(user) do
       raise NotFoundError,
-        message: "working time does not exists using id " <> Integer.to_string(working_time_id)
+        message: "user does not exists using id " <> userId
     end
 
-    clock = %Clock{
-      time: time,
-      status: status,
-      working_time: working_time
-    }
+    last_user_clock = List.first(get_user_last_clocks(userId, 1), nil)
 
-    Repo.insert!(clock)
+    if is_nil(last_user_clock) do
+      clock = %Clock{
+        time: time,
+        status: true,
+        user: user
+      }
+
+      Repo.insert!(clock)
+    else
+      status = Map.get(last_user_clock, :status)
+
+      clock = %Clock{
+        time: time,
+        status: not status,
+        user: user
+      }
+
+      Repo.insert!(clock)
+    end
   end
 
   def update_clock(%Clock{} = clock, attrs) do

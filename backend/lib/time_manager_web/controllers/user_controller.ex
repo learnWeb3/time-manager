@@ -7,11 +7,11 @@ defmodule TimeManagerWeb.UserController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
+  # plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
   # check user permission using token
   roles = Role.get()
-  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+  # plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
   def index(conn, params) do
     users = Application.list_users(params)
