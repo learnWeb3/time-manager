@@ -91,8 +91,8 @@ defmodule TimeManager.Application do
             },
             where:
               clock.status == ^status and
-                clock.inserted_at >= ^startDatetime and
-                clock.inserted_at <= ^endDatetime,
+                clock.time >= ^startDatetime and
+                clock.time <= ^endDatetime,
             group_by: [
               clock.user_id
             ]
@@ -107,8 +107,8 @@ defmodule TimeManager.Application do
         TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
         FROM clocks
         WHERE clocks.status = $2
-        AND clocks.inserted_at >= $3
-        AND clocks.inserted_at <= $4
+        AND clocks.time >= $3
+        AND clocks.time <= $4
         GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
         """
 
@@ -135,8 +135,8 @@ defmodule TimeManager.Application do
               clock.user_id ==
                 ^userId and
                 clock.status == ^status and
-                clock.inserted_at >= ^startDatetime and
-                clock.inserted_at <= ^endDatetime,
+                clock.time >= ^startDatetime and
+                clock.time <= ^endDatetime,
             group_by: [
               clock.user_id
             ]
@@ -152,8 +152,8 @@ defmodule TimeManager.Application do
         FROM clocks
         WHERE clocks.user_id = $2::integer
         AND clocks.status = $3
-        AND clocks.inserted_at >= $4
-        AND clocks.inserted_at <= $5
+        AND clocks.time >= $4
+        AND clocks.time <= $5
         GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
         """
 
@@ -180,28 +180,27 @@ defmodule TimeManager.Application do
     available_periodicity = %{
       "global" => nil,
       # day name
-      "dayname" => "dy",
+      "dayofweek" => "D",
       # day of the month
       "dayofmonth" => "DD",
       # day of the year
-      "dayoftheyear" => "DDD",
+      "dayofyear" => "DDD",
       # day
       "day" => "DD:MM:YYYY",
       # week number
       "week" => "WW",
       # month name
-      "month" => "mon",
+      "month" => "MM",
       # year
       "year" => "YYYY"
     }
 
     periodicity = Map.get(params, "periodicity", "global")
-    startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
+    startDate = Map.get(params, "start", "#{unix_datetime - year_in_seconds}")
     # default to current datetime in seconds
-    endDate = Map.get(params, "end", unix_datetime)
-
-    startDatetime = DateTime.to_naive(DateTime.from_unix!(startDate))
-    endDatetime = DateTime.to_naive(DateTime.from_unix!(endDate))
+    endDate = Map.get(params, "end", "#{unix_datetime}")
+    {startDatetime, _} = Integer.parse(startDate)
+    {endDatetime, _} = Integer.parse(endDate)
 
     current_periodicity = Map.get(available_periodicity, periodicity)
 
@@ -215,8 +214,6 @@ defmodule TimeManager.Application do
 
     departure_sums = build_presence_query(departure_query_params)
 
-    IO.inspect(departure_sums)
-
     arrival_query_params = %{
       "userId" => userId,
       "startDatetime" => startDatetime,
@@ -226,7 +223,6 @@ defmodule TimeManager.Application do
     }
 
     arrival_sums = build_presence_query(arrival_query_params)
-    IO.inspect(arrival_sums)
 
     calculate_presence_duration_from_sums(departure_sums, arrival_sums)
   end
