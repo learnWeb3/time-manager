@@ -20,4 +20,4 @@ RUN mix compile
 RUN MIX_ENV=prod mix assets.deploy
 
 # Finally run the server
-CMD MIX_ENV=prod mix ecto.migrate && PORT=4000 MIX_ENV=prod mix phx.server
+CMD MIX_ENV=prod mix ecto.migrate && MIX_ENV=prod mix run priv/repo/seeds.ex && PORT=4000 MIX_ENV=prod mix phx.server

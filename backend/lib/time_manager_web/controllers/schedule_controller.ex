@@ -8,8 +8,8 @@ defmodule TimeManagerWeb.ScheduleController do
   plug(TimeManager.Plugs.Auth, "" when action in [:create, :update, :index])
 
   # check user permission using token
-  # roles = Role.get()
-  # plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+  roles = Role.get()
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
   def index(conn, params) do
     try do

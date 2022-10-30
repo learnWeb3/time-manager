@@ -10,8 +10,8 @@ defmodule TimeManagerWeb.UserController do
   # plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
   # check user permission using token
-  # roles = Role.get()
-  # plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+  roles = Role.get()
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
   def index(conn, params) do
     users = Application.list_users(params)
