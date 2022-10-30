@@ -2,7 +2,7 @@ defmodule TimeManager.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
   alias TimeManager.Repo
   alias Elixir.BcryptElixir
   alias Elixir.Bcrypt
@@ -74,10 +74,107 @@ defmodule TimeManager.Application do
     end
   end
 
+  def build_presence_query(%{
+        "userId" => userId,
+        "startDatetime" => startDatetime,
+        "endDatetime" => endDatetime,
+        "status" => status,
+        "periodicity" => periodicity
+      }) do
+    if is_nil(userId) do
+      if is_nil(periodicity) do
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id
+            ]
+          )
+
+        Repo.all(query)
+      else
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
+          )
+
+        Repo.all(query)
+      end
+    else
+      if is_nil(periodicity) do
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.user_id ==
+                ^userId and
+                clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id
+            ]
+          )
+
+        Repo.all(query)
+      else
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.user_id ==
+                ^userId and
+                clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
+          )
+
+        Repo.all(query)
+      end
+    end
+  end
+
   def get_presence(params) do
     userId = Map.get(params, "userId", nil)
     unix_datetime = get_unix_current_time()
     year_in_seconds = 365 * 24 * 60 * 60
+
+    # one of : [global, day, week, month] default to global
+    available_periodicity = %{
+      "global" => nil,
+      # day name
+      "dayname" => "dy",
+      # day of the month
+      "dayofmonth" => "DD",
+      # day of the year
+      "dayoftheyear" => "DDD",
+      # day
+      "day" => "DD:MM:YYYY",
+      # week number
+      "week" => "WW",
+      # month name
+      "month" => "mon",
+      # year
+      "year" => "YYYY"
+    }
+
+    periodicity = Map.get(params, "periodicity", "global")
     startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
     # default to current datetime in seconds
     endDate = Map.get(params, "end", unix_datetime)
@@ -85,63 +182,32 @@ defmodule TimeManager.Application do
     startDatetime = DateTime.to_naive(DateTime.from_unix!(startDate))
     endDatetime = DateTime.to_naive(DateTime.from_unix!(endDate))
 
-    if is_nil(userId) do
-      departure_time_sum_query =
-        from(clock in Clock,
-          select: {sum(clock.time), clock.user_id},
-          where:
-            clock.status == false and
-              clock.inserted_at >= ^startDatetime and
-              clock.inserted_at <= ^endDatetime,
-          group_by: clock.user_id
-        )
+    current_periodicity = Map.get(available_periodicity, periodicity)
 
-      departure_sums = Repo.all(departure_time_sum_query)
+    departure_query_params = %{
+      "userId" => userId,
+      "startDatetime" => startDatetime,
+      "endDatetime" => endDatetime,
+      "status" => false,
+      "periodicity" => current_periodicity
+    }
 
-      arrival_time_sum_query =
-        from(clock in Clock,
-          select: {sum(clock.time), clock.user_id},
-          where:
-            clock.status == true and
-              clock.inserted_at >= ^startDatetime and
-              clock.inserted_at <= ^endDatetime,
-          group_by: clock.user_id
-        )
+    departure_sums = build_presence_query(departure_query_params)
 
-      arrival_sums = Repo.all(arrival_time_sum_query)
+    IO.inspect(departure_sums)
 
-      calculate_presence_duration_from_sums(departure_sums, arrival_sums)
-    else
-      departure_time_sum_query =
-        from(clock in Clock,
-          select: {sum(clock.time), clock.user_id},
-          where:
-            clock.user_id ==
-              ^userId and
-              clock.status == false and
-              clock.inserted_at >= ^startDatetime and
-              clock.inserted_at <= ^endDatetime,
-          group_by: clock.user_id
-        )
+    arrival_query_params = %{
+      "userId" => userId,
+      "startDatetime" => startDatetime,
+      "endDatetime" => endDatetime,
+      "status" => true,
+      "periodicity" => current_periodicity
+    }
 
-      departure_sums = Repo.all(departure_time_sum_query)
+    arrival_sums = build_presence_query(arrival_query_params)
+    IO.inspect(arrival_sums)
 
-      arrival_time_sum_query =
-        from(clock in Clock,
-          select: {sum(clock.time), clock.user_id},
-          where:
-            clock.user_id ==
-              ^userId and
-              clock.status == true and
-              clock.inserted_at >= ^startDatetime and
-              clock.inserted_at <= ^endDatetime,
-          group_by: clock.user_id
-        )
-
-      arrival_sums = Repo.all(arrival_time_sum_query)
-
-      calculate_presence_duration_from_sums(departure_sums, arrival_sums)
-    end
+    calculate_presence_duration_from_sums(departure_sums, arrival_sums)
   end
 
   # =========  USERS ============
