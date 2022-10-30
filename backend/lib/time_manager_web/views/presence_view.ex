@@ -13,7 +13,8 @@ defmodule TimeManagerWeb.PresenceView do
   def render("presence.json", %{presence: presence}) do
     %{
       duration: presence.duration,
-      user_id: presence.user_id
+      user_id: presence.user_id,
+      periodicity: presence.periodicity
     }
   end
 end
