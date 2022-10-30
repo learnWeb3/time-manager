@@ -55,20 +55,21 @@ defmodule TimeManager.Application do
       {_arrival_sum, userId} = List.first(arrival_sums)
       # slow - check for impact to prepend instead of append as ++ has a 0(n) complexity
       unix_datetime = get_unix_current_time()
-      departure_sums = departure_sums ++ [{unix_datetime, userId, 0}]
+      IO.inspect(unix_datetime)
+      departure_sums = departure_sums ++ [{unix_datetime, userId}]
 
       Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId, periodicity} = departure_sum
-        {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
 
-        %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
+        %{duration: departure_sum - arrival_sum, user_id: userId}
       end)
     else
       Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId, periodicity} = departure_sum
-        {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
 
-        %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
+        %{duration: departure_sum - arrival_sum, user_id: userId}
       end)
     end
   end
@@ -84,15 +85,11 @@ defmodule TimeManager.Application do
       if is_nil(periodicity) do
         query =
           from(clock in Clock,
-            select: {
-              sum(clock.time),
-              clock.user_id,
-              0
-            },
+            select: {sum(clock.time), clock.user_id},
             where:
               clock.status == ^status and
-                clock.time >= ^startDatetime and
-                clock.time <= ^endDatetime,
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
             group_by: [
               clock.user_id
             ]
@@ -100,43 +97,32 @@ defmodule TimeManager.Application do
 
         Repo.all(query)
       else
-        query = """
-        SELECT
-        SUM(clocks.time),
-        clocks.user_id,
-        TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
-        FROM clocks
-        WHERE clocks.status = $2
-        AND clocks.time >= $3
-        AND clocks.time <= $4
-        GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
-        """
-
-        params = [periodicity, status, startDatetime, endDatetime]
-
-        {:ok, result} =
-          Repo.query(
-            query,
-            params
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
           )
 
-        Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        Repo.all(query)
       end
     else
       if is_nil(periodicity) do
         query =
           from(clock in Clock,
-            select: {
-              sum(clock.time),
-              clock.user_id,
-              0
-            },
+            select: {sum(clock.time), clock.user_id},
             where:
               clock.user_id ==
                 ^userId and
                 clock.status == ^status and
-                clock.time >= ^startDatetime and
-                clock.time <= ^endDatetime,
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
             group_by: [
               clock.user_id
             ]
@@ -144,29 +130,22 @@ defmodule TimeManager.Application do
 
         Repo.all(query)
       else
-        query = """
-        SELECT
-        SUM(clocks.time),
-        clocks.user_id,
-        TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
-        FROM clocks
-        WHERE clocks.user_id = $2::integer
-        AND clocks.status = $3
-        AND clocks.time >= $4
-        AND clocks.time <= $5
-        GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
-        """
-
-        {userId, _} = Integer.parse(userId)
-        params = [periodicity, userId, status, startDatetime, endDatetime]
-
-        {:ok, result} =
-          Repo.query(
-            query,
-            params
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.user_id ==
+                ^userId and
+                clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
           )
 
-        Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        Repo.all(query)
       end
     end
   end
@@ -180,27 +159,22 @@ defmodule TimeManager.Application do
     available_periodicity = %{
       "global" => nil,
       # day name
-      "dayofweek" => "D",
-      # day of the month
-      "dayofmonth" => "DD",
-      # day of the year
-      "dayofyear" => "DDD",
-      # day
-      "day" => "DD:MM:YYYY",
+      "day" => "dy",
       # week number
       "week" => "WW",
       # month name
-      "month" => "MM",
+      "month" => "mon",
       # year
       "year" => "YYYY"
     }
 
     periodicity = Map.get(params, "periodicity", "global")
-    startDate = Map.get(params, "start", "#{unix_datetime - year_in_seconds}")
+    startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
     # default to current datetime in seconds
-    endDate = Map.get(params, "end", "#{unix_datetime}")
-    {startDatetime, _} = Integer.parse(startDate)
-    {endDatetime, _} = Integer.parse(endDate)
+    endDate = Map.get(params, "end", unix_datetime)
+
+    startDatetime = DateTime.to_naive(DateTime.from_unix!(startDate))
+    endDatetime = DateTime.to_naive(DateTime.from_unix!(endDate))
 
     current_periodicity = Map.get(available_periodicity, periodicity)
 
@@ -632,12 +606,7 @@ defmodule TimeManager.Application do
   def create_schedule(schedule_params) do
     schedule = %Schedule{}
     changeset = Schedule.changeset(schedule, schedule_params)
-
-    if changeset.valid? do
-      Repo.insert(changeset)
-    else
-      changeset_error_to_string(changeset)
-    end
+    Repo.insert!(changeset)
   end
 
   def delete_schedule(id) do
