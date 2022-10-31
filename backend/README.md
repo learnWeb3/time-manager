@@ -35,6 +35,7 @@ To start the application:
   * Open a terminal and place yourself under the root project directory
   * Build the project image using `docker compose build`
   * Run the project containers using `docker compose up -d`
+  * Seed the databased if required eg: first start up using `docker exec -it <backend container id > /bin/sh` and then    using the seed script and the following command `MIX_ENV=prod mix run ./priv/repo/seeds.exs` this will seed the admin user
 
 ### Admin user credentials 
 

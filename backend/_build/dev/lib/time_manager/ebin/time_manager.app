@@ -18,6 +18,8 @@
           'Elixir.TimeManager.Application.User',
           'Elixir.TimeManager.Application.WorkingTime',
           'Elixir.TimeManager.Mailer','Elixir.TimeManager.Plugs.Auth',
+          'Elixir.TimeManager.Plugs.AuthorizeParams',
+          'Elixir.TimeManager.Plugs.RequireParams',
           'Elixir.TimeManager.Plugs.RoleGuard','Elixir.TimeManager.Repo',
           'Elixir.TimeManagerWeb','Elixir.TimeManagerWeb.ChangesetView',
           'Elixir.TimeManagerWeb.ClockController',
