@@ -2,11 +2,15 @@ defmodule TimeManagerWeb.WorkingTimeController do
   use TimeManagerWeb, :controller
 
   alias TimeManager.Application
-  alias TimeManager.Application.WorkingTime
+  alias TimeManager.Application.Role
+
+  action_fallback(TimeManagerWeb.FallbackController)
 
   plug(TimeManager.Plugs.Auth, "" when action in [:index, :create, :show, :delete])
 
-  action_fallback(TimeManagerWeb.FallbackController)
+  # check user permission using token
+  roles = Role.get()
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
   def index(conn, params) do
     userId = Map.get(params, "userId", nil)

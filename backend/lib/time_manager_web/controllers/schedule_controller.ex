@@ -1,10 +1,15 @@
 defmodule TimeManagerWeb.ScheduleController do
   use TimeManagerWeb, :controller
   alias TimeManager.Application
+  alias TimeManager.Application.Role
 
   action_fallback(TimeManagerWeb.FallbackController)
 
   plug(TimeManager.Plugs.Auth, "" when action in [:create, :update, :index])
+
+  # check user permission using token
+  roles = Role.get()
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
   def index(conn, params) do
     try do

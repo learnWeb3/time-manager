@@ -6,9 +6,26 @@ defmodule TimeManagerWeb.ClockController do
 
   plug(TimeManager.Plugs.Auth, "" when action in [:create, :user_clocks])
 
-  def create(conn, %{"clock" => clock_params}) do
+  def presence(conn, params) do
     try do
-      clock = Application.create_clock(clock_params)
+      presences = Application.get_presence(params)
+
+      conn
+      |> put_status(:created)
+      |> render(TimeManagerWeb.PresenceView, "index.json", presences: presences)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
+    end
+  end
+
+  def create(conn, %{"userId" => userId, "clock" => clock_params}) do
+    try do
+      clock = Application.create_clock(userId, clock_params)
 
       conn
       |> put_status(:created)

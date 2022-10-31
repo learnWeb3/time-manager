@@ -7,7 +7,7 @@ defmodule TimeManager.Repo.Migrations.CreateUsers do
       add(:email, :string)
       add(:password, :string)
       add(:jobtitle, :string)
-      # add(:role, :integer)
+      add(:role, :integer)
 
       timestamps()
     end
