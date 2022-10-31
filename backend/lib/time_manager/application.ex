@@ -208,7 +208,9 @@ defmodule TimeManager.Application do
       if is_nil(working_time_id) do
         query =
           from(clock in Clock,
-            where: clock.user_id == ^userId,
+            join: working_time in WorkingTime,
+            on: working_time.id == clock.working_time_id,
+            where: working_time.user_id == ^userId,
             order_by: [desc: clock.inserted_at]
           )
 
@@ -216,7 +218,9 @@ defmodule TimeManager.Application do
       else
         query =
           from(clock in Clock,
-            where: clock.user_id == ^userId and clock.working_time_id == ^working_time_id,
+            join: working_time in WorkingTime,
+            on: working_time.id == clock.working_time_id,
+            where: working_time.user_id == ^userId and clock.working_time_id == ^working_time_id,
             order_by: [desc: clock.inserted_at]
           )
 
@@ -332,9 +336,9 @@ defmodule TimeManager.Application do
         order_by: [desc: working_time.inserted_at]
       )
 
-    working_time = Repo.all(query)
+    working_times = Repo.all(query)
 
-    if not is_nil(working_time) do
+    if Kernel.length(working_times) > 0 do
       raise ValidationError,
         message:
           "user with id " <>
@@ -347,7 +351,8 @@ defmodule TimeManager.Application do
       schedule: schedule
     }
 
-    Repo.insert!(new_working_time)
+    {:ok, new_working_time} = Repo.insert(new_working_time)
+    new_working_time
   end
 
   def delete_working_time(id) do

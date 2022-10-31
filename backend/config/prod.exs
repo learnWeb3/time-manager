@@ -15,6 +15,9 @@ config :time_manager, TimeManagerWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Initialize the secret used to encode JWT token to serve authentication purposes
+config :joken, default_signer: "jwt-secret"
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
