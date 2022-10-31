@@ -2,7 +2,7 @@ defmodule TimeManager.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
   alias TimeManager.Repo
   alias Elixir.BcryptElixir
   alias Elixir.Bcrypt
@@ -38,7 +38,170 @@ defmodule TimeManager.Application do
   end
 
   alias TimeManager.Application.User
+  alias TimeManager.Application.Schedule
+  alias TimeManager.Application.Clock
+  alias TimeManager.Application.WorkingTime
 
+  # ========= PRSENCE ===========
+
+  def get_unix_current_time do
+    {:ok, current_datetime} = DateTime.now("Etc/UTC")
+    DateTime.to_unix(current_datetime, :second)
+  end
+
+  def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
+    # add a tuple {unix_datetime, userId} if user is still working (has not left yet)
+    if Kernel.length(departure_sums) < Kernel.length(arrival_sums) do
+      {_arrival_sum, userId} = List.first(arrival_sums)
+      # slow - check for impact to prepend instead of append as ++ has a 0(n) complexity
+      unix_datetime = get_unix_current_time()
+      IO.inspect(unix_datetime)
+      departure_sums = departure_sums ++ [{unix_datetime, userId}]
+
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    else
+      Enum.with_index(departure_sums, fn departure_sum, index ->
+        {departure_sum, userId} = departure_sum
+        {arrival_sum, userId} = Enum.at(arrival_sums, index)
+
+        %{duration: departure_sum - arrival_sum, user_id: userId}
+      end)
+    end
+  end
+
+  def build_presence_query(%{
+        "userId" => userId,
+        "startDatetime" => startDatetime,
+        "endDatetime" => endDatetime,
+        "status" => status,
+        "periodicity" => periodicity
+      }) do
+    if is_nil(userId) do
+      if is_nil(periodicity) do
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id
+            ]
+          )
+
+        Repo.all(query)
+      else
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
+          )
+
+        Repo.all(query)
+      end
+    else
+      if is_nil(periodicity) do
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.user_id ==
+                ^userId and
+                clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id
+            ]
+          )
+
+        Repo.all(query)
+      else
+        query =
+          from(clock in Clock,
+            select: {sum(clock.time), clock.user_id},
+            where:
+              clock.user_id ==
+                ^userId and
+                clock.status == ^status and
+                clock.inserted_at >= ^startDatetime and
+                clock.inserted_at <= ^endDatetime,
+            group_by: [
+              clock.user_id,
+              fragment("TO_CHAR(TO_TIMESTAMP(?), ?)", clock.time, ^periodicity)
+            ]
+          )
+
+        Repo.all(query)
+      end
+    end
+  end
+
+  def get_presence(params) do
+    userId = Map.get(params, "userId", nil)
+    unix_datetime = get_unix_current_time()
+    year_in_seconds = 365 * 24 * 60 * 60
+
+    # one of : [global, day, week, month] default to global
+    available_periodicity = %{
+      "global" => nil,
+      # day name
+      "day" => "dy",
+      # week number
+      "week" => "WW",
+      # month name
+      "month" => "mon",
+      # year
+      "year" => "YYYY"
+    }
+
+    periodicity = Map.get(params, "periodicity", "global")
+    startDate = Map.get(params, "start", unix_datetime - year_in_seconds)
+    # default to current datetime in seconds
+    endDate = Map.get(params, "end", unix_datetime)
+
+    startDatetime = DateTime.to_naive(DateTime.from_unix!(startDate))
+    endDatetime = DateTime.to_naive(DateTime.from_unix!(endDate))
+
+    current_periodicity = Map.get(available_periodicity, periodicity)
+
+    departure_query_params = %{
+      "userId" => userId,
+      "startDatetime" => startDatetime,
+      "endDatetime" => endDatetime,
+      "status" => false,
+      "periodicity" => current_periodicity
+    }
+
+    departure_sums = build_presence_query(departure_query_params)
+
+    arrival_query_params = %{
+      "userId" => userId,
+      "startDatetime" => startDatetime,
+      "endDatetime" => endDatetime,
+      "status" => true,
+      "periodicity" => current_periodicity
+    }
+
+    arrival_sums = build_presence_query(arrival_query_params)
+
+    calculate_presence_duration_from_sums(departure_sums, arrival_sums)
+  end
+
+  # =========  USERS ============
   def encode_password(password) do
     Bcrypt.Base.hash_password(password, Bcrypt.Base.gen_salt(12, true))
   end
@@ -48,11 +211,20 @@ defmodule TimeManager.Application do
   end
 
   def verify_token(bearer_token) do
-    TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+    try do
+      TimeManager.Application.JwtToken.verify_and_validate!(bearer_token)
+    rescue
+      _e ->
+        raise JWTMissingTokenError
+    end
   end
 
   def sign_in(email, password) do
-    user = Repo.get_by!(User, email: email)
+    user = Repo.get_by(User, email: email)
+
+    if is_nil(user) do
+      raise NotFoundError, message: "invalid credentials"
+    end
 
     check = verify_user(password, user.password)
 
@@ -60,51 +232,64 @@ defmodule TimeManager.Application do
       extra_claims = %{"sub" => user.id}
       TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
     else
-      nil
+      raise ValidationError, message: "invalid credentials"
     end
   end
 
-  @doc """
-  Returns the list of users.
+  def list_users(params) do
+    email = Map.get(params, "email", nil)
+    username = Map.get(params, "username", nil)
 
-  ## Examples
+    cond do
+      is_nil(email) and is_nil(username) ->
+        query =
+          from(user in User,
+            order_by: [desc: user.inserted_at]
+          )
 
-      iex> list_users()
-      [%User{}, ...]
+        Repo.all(query)
 
-  """
-  def list_users do
-    Repo.all(User)
+      is_nil(email) and not is_nil(username) ->
+        query =
+          from(user in User,
+            where: user.username == ^username,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+
+      not is_nil(email) and is_nil(username) ->
+        query =
+          from(user in User,
+            where: user.email == ^email,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+
+      not is_nil(email) and not is_nil(username) ->
+        query =
+          from(user in User,
+            where:
+              user.email == ^email and
+                user.username == ^username,
+            order_by: [desc: user.inserted_at]
+          )
+
+        Repo.all(query)
+    end
   end
 
-  @doc """
-  Gets a single user.
+  def get_user!(id) do
+    user = Repo.get(User, id)
 
-  Raises `Ecto.NoResultsError` if the User does not exist.
+    if is_nil(user) do
+      raise NotFoundError, message: "user not found for user with id " <> id
+    else
+      user
+    end
+  end
 
-  ## Examples
-
-      iex> get_user!(123)
-      %User{}
-
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_user!(id), do: Repo.get!(User, id)
-
-  @doc """
-  Creates a user.
-
-  ## Examples
-
-      iex> create_user(%{field: value})
-      {:ok, %User{}}
-
-      iex> create_user(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def create_user(attrs \\ %{}) do
     email = Map.get(attrs, "email")
 
@@ -123,177 +308,247 @@ defmodule TimeManager.Application do
     end
   end
 
-  @doc """
-  Updates a user.
-
-  ## Examples
-
-      iex> update_user(user, %{field: new_value})
-      {:ok, %User{}}
-
-      iex> update_user(user, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
+    plain_text_password = Map.get(attrs, "password", nil)
+
+    if not is_nil(plain_text_password) do
+      %{password_hash: hashed_password} = Bcrypt.add_hash(plain_text_password)
+      attrs = Map.put(attrs, "password", hashed_password)
+
+      user
+      |> User.changeset(attrs)
+      |> Repo.update()
+    else
+      user
+      |> User.changeset(attrs)
+      |> Repo.update()
+    end
   end
 
-  @doc """
-  Deletes a user.
+  def delete_user(id) do
+    user = Repo.get(User, id)
+    # check for relations existences to send proper errors
+    # - working_times
 
-  ## Examples
+    query =
+      from(working_time in WorkingTime,
+        where: working_time.user_id == ^id
+      )
 
-      iex> delete_user(user)
-      {:ok, %User{}}
+    user_working_times = Repo.all(query)
 
-      iex> delete_user(user)
-      {:error, %Ecto.Changeset{}}
+    if Kernel.length(user_working_times) > 0 do
+      raise ValidationError, message: "user possess working_times and thus can not be deleted"
+    end
 
-  """
-  def delete_user(%User{} = user) do
+    if is_nil(user) do
+      raise NotFoundError, message: "user does not exists with id " <> id
+    end
+
     Repo.delete(user)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-  ## Examples
-
-      iex> change_user(user)
-      %Ecto.Changeset{data: %User{}}
-
-  """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
 
-  alias TimeManager.Application.Clock
+  # =========  CLOCKS ============
 
-  @doc """
-  Returns the list of clocks.
-
-  ## Examples
-
-      iex> list_clocks()
-      [%Clock{}, ...]
-
-  """
   def list_clocks do
     Repo.all(Clock)
   end
 
-  @doc """
-  Gets a single clock.
-
-  Raises `Ecto.NoResultsError` if the Clock does not exist.
-
-  ## Examples
-
-      iex> get_clock!(123)
-      %Clock{}
-
-      iex> get_clock!(456)
-      ** (Ecto.NoResultsError)
-
-  """
   def get_clock!(id), do: Repo.get!(Clock, id)
 
-  def get_user_clocks(userId) do
-    query = from(clock in Clock, where: clock.user_id == ^userId)
+  def get_user_clocks(params) do
+    userId = Map.get(params, "userId", nil)
+    user = Repo.get_by(User, id: userId)
+
+    if is_nil(user) do
+      raise NotFoundError, message: "user not found for user with id " <> userId
+    else
+      query =
+        from(clock in Clock,
+          where: clock.user_id == ^userId,
+          order_by: [desc: clock.inserted_at]
+        )
+
+      Repo.all(query)
+    end
+  end
+
+  def get_user_last_clocks(userId, limit) do
+    query =
+      from(clock in Clock,
+        where: clock.user_id == ^userId,
+        order_by: [desc: clock.inserted_at],
+        limit: ^limit
+      )
+
     Repo.all(query)
   end
 
-  @doc """
-  Creates a clock.
+  def create_clock(userId, clock_params) do
+    time = Map.get(clock_params, "time", nil)
+    user = Repo.get(User, userId)
 
-  ## Examples
+    if is_nil(user) do
+      raise NotFoundError,
+        message: "user does not exists using id " <> userId
+    end
 
-      iex> create_clock(%{field: value})
-      {:ok, %Clock{}}
+    last_user_clock = List.first(get_user_last_clocks(userId, 1), nil)
 
-      iex> create_clock(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+    if is_nil(last_user_clock) do
+      clock = %Clock{
+        time: time,
+        status: true,
+        user: user
+      }
 
-  """
-  def create_clock(userId, time, status) do
-    user = get_user!(userId)
+      Repo.insert!(clock)
+    else
+      status = Map.get(last_user_clock, :status)
 
-    clock = %Clock{
-      user: user,
-      time: time,
-      status: status
-    }
+      clock = %Clock{
+        time: time,
+        status: not status,
+        user: user
+      }
 
-    Repo.insert!(clock)
+      Repo.insert!(clock)
+    end
   end
 
-  @doc """
-  Updates a clock.
-
-  ## Examples
-
-      iex> update_clock(clock, %{field: new_value})
-      {:ok, %Clock{}}
-
-      iex> update_clock(clock, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def update_clock(%Clock{} = clock, attrs) do
     clock
     |> Clock.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a clock.
-
-  ## Examples
-
-      iex> delete_clock(clock)
-      {:ok, %Clock{}}
-
-      iex> delete_clock(clock)
-      {:error, %Ecto.Changeset{}}
-
-  """
   def delete_clock(%Clock{} = clock) do
     Repo.delete(clock)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking clock changes.
-
-  ## Examples
-
-      iex> change_clock(clock)
-      %Ecto.Changeset{data: %Clock{}}
-
-  """
   def change_clock(%Clock{} = clock, attrs \\ %{}) do
     Clock.changeset(clock, attrs)
   end
 
-  alias TimeManager.Application.WorkingTime
+  # =========  WORKING_TIMES ============
 
-  @doc """
-  Returns the list of working_times.
+  def list_working_times(userId, scheduleId) do
+    cond do
+      is_nil(userId) and is_nil(scheduleId) ->
+        query =
+          from(working_time in WorkingTime,
+            order_by: [desc: working_time.inserted_at]
+          )
 
-  ## Examples
+        Repo.all(query)
 
-      iex> list_working_times()
-      [%WorkingTime{}, ...]
+      is_nil(userId) and not is_nil(scheduleId) ->
+        query =
+          from(working_time in WorkingTime,
+            where: working_time.schedule_id == ^scheduleId,
+            order_by: [desc: working_time.inserted_at]
+          )
 
-  """
-  def list_working_times(userId, startDate, endDate) do
+        Repo.all(query)
+
+      not is_nil(userId) and is_nil(scheduleId) ->
+        query =
+          from(working_time in WorkingTime,
+            where: working_time.user_id == ^userId,
+            order_by: [desc: working_time.inserted_at]
+          )
+
+        Repo.all(query)
+
+      not is_nil(userId) and not is_nil(scheduleId) ->
+        query =
+          from(working_time in WorkingTime,
+            where:
+              working_time.user_id == ^userId and
+                working_time.schedule_id == ^scheduleId,
+            order_by: [desc: working_time.inserted_at]
+          )
+
+        Repo.all(query)
+    end
+  end
+
+  def get_working_time!(id) do
+    working_time = Repo.get(WorkingTime, id)
+
+    if is_nil(working_time) do
+      raise NotFoundError, message: "working time does not exists using id " <> id
+    end
+  end
+
+  def create_working_time(userId, working_time_params) do
+    user = get_user!(userId)
+
+    schedule_id = Map.get(working_time_params, "schedule_id", nil)
+
+    if is_nil(schedule_id) do
+      raise ValidationError, message: "Missing body parameter working_time_id"
+    end
+
+    schedule = Repo.get(Schedule, schedule_id)
+
+    if is_nil(schedule) do
+      raise NotFoundError, message: "Schedule does not exists"
+    end
+
+    query =
+      from(working_time in WorkingTime,
+        where: working_time.user_id == ^userId and working_time.schedule_id == ^schedule_id,
+        order_by: [desc: working_time.inserted_at]
+      )
+
+    working_times = Repo.all(query)
+
+    if Kernel.length(working_times) > 0 do
+      raise ValidationError,
+        message:
+          "user with id " <>
+            Integer.to_string(userId) <>
+            " has already registered for schedule with id " <> Integer.to_string(schedule_id)
+    end
+
+    new_working_time = %WorkingTime{
+      user: user,
+      schedule: schedule
+    }
+
+    {:ok, new_working_time} = Repo.insert(new_working_time)
+    new_working_time
+  end
+
+  def delete_working_time(id) do
+    # check for relations existences to send proper errors
+    # - schedule
+
+    working_time = Repo.get(WorkingTime, id)
+
+    if is_nil(working_time) do
+      raise NotFoundError, message: "working time does not exists using id" <> id
+    end
+
+    Repo.delete(working_time)
+  end
+
+  def change_working_time(%WorkingTime{} = working_time, attrs \\ %{}) do
+    WorkingTime.changeset(working_time, attrs)
+  end
+
+  # =========  SCHEDULES  ============
+  def list_schedules(startDate, endDate) do
     cond do
       is_nil(startDate) and is_nil(endDate) ->
         query =
-          from(workingtime in WorkingTime,
-            where: workingtime.user_id == ^userId
+          from(schedule in Schedule,
+            order_by: [desc: schedule.inserted_at]
           )
 
         Repo.all(query)
@@ -302,10 +557,9 @@ defmodule TimeManager.Application do
         {endDate, ""} = Integer.parse(endDate)
 
         query =
-          from(workingtime in WorkingTime,
-            where:
-              workingtime.user_id == ^userId and
-                workingtime.end >= ^endDate
+          from(schedule in Schedule,
+            where: schedule.end >= ^endDate,
+            order_by: [desc: schedule.inserted_at]
           )
 
         Repo.all(query)
@@ -314,10 +568,9 @@ defmodule TimeManager.Application do
         {startDate, ""} = Integer.parse(startDate)
 
         query =
-          from(workingtime in WorkingTime,
-            where:
-              workingtime.user_id == ^userId and
-                workingtime.start >= ^startDate
+          from(schedule in Schedule,
+            where: schedule.start >= ^startDate,
+            order_by: [desc: schedule.inserted_at]
           )
 
         Repo.all(query)
@@ -327,115 +580,69 @@ defmodule TimeManager.Application do
         {startDate, ""} = Integer.parse(startDate)
 
         query =
-          from(workingtime in WorkingTime,
+          from(schedule in Schedule,
             where:
-              workingtime.user_id == ^userId and
-                workingtime.start >= ^startDate and
-                workingtime.end >= ^endDate
+              schedule.start >= ^startDate and
+                schedule.end >= ^endDate,
+            order_by: [desc: schedule.inserted_at]
           )
 
         Repo.all(query)
     end
   end
 
-  @doc """
-  Gets a single working_time.
+  def update_schedule(id, schedule_params) do
+    schedule = Repo.get(Schedule, id)
 
-  Raises `Ecto.NoResultsError` if the Working time does not exist.
-
-  ## Examples
-
-      iex> get_working_time!(123)
-      %WorkingTime{}
-
-      iex> get_working_time!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_working_time!(id), do: Repo.get!(WorkingTime, id)
-
-  @doc """
-  Creates a working_time.
-
-  ## Examples
-
-      iex> create_working_time(%{field: value})
-      {:ok, %WorkingTime{}}
-
-      iex> create_working_time(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_working_time(userId, startDate, endDate) do
-    user = get_user!(userId)
-
-    working_time = %WorkingTime{
-      user: user,
-      start: startDate,
-      end: endDate
-    }
-
-    Repo.insert!(working_time)
-  end
-
-  @doc """
-  Updates a working_time.
-
-  ## Examples
-
-      iex> update_working_time(working_time, %{field: new_value})
-      {:ok, %WorkingTime{}}
-
-      iex> update_working_time(working_time, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_working_time(id, startDate, endDate) do
-    cond do
-      is_nil(startDate) and not is_nil(endDate) and is_integer(endDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{end: endDate})
-        |> Repo.update()
-
-      is_nil(endDate) and not is_nil(startDate) and is_integer(startDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{start: startDate})
-        |> Repo.update()
-
-      not is_nil(startDate) and is_integer(endDate) and not is_nil(endDate) and
-          is_integer(endDate) ->
-        Repo.get_by(WorkingTime, id: id)
-        |> Ecto.Changeset.change(%{start: startDate, end: endDate})
-        |> Repo.update()
+    if is_nil(schedule) do
+      raise NotFoundError, message: "schedule does not exists using id " <> id
     end
+
+    changeset = Schedule.changeset(schedule, schedule_params)
+    {:ok, updated_schedule} = Repo.update(changeset)
+    updated_schedule
   end
 
-  @doc """
-  Deletes a working_time.
-
-  ## Examples
-
-      iex> delete_working_time(working_time)
-      {:ok, %WorkingTime{}}
-
-      iex> delete_working_time(working_time)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_working_time(%WorkingTime{} = working_time) do
-    Repo.delete(working_time)
+  def create_schedule(schedule_params) do
+    schedule = %Schedule{}
+    changeset = Schedule.changeset(schedule, schedule_params)
+    Repo.insert!(changeset)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking working_time changes.
+  def delete_schedule(id) do
+    schedule = Repo.get(Schedule, id)
 
-  ## Examples
+    if is_nil(schedule) do
+      raise NotFoundError, message: "schedule does not exists using id " <> id
+    end
 
-      iex> change_working_time(working_time)
-      %Ecto.Changeset{data: %WorkingTime{}}
+    # check relations existence to send proper messages
+    query =
+      from(working_time in WorkingTime,
+        where: working_time.schedule_id == ^id
+      )
 
-  """
-  def change_working_time(%WorkingTime{} = working_time, attrs \\ %{}) do
-    WorkingTime.changeset(working_time, attrs)
+    schedule_working_times = Repo.all(query)
+
+    if Kernel.length(schedule_working_times) > 0 do
+      raise ValidationError,
+        message: "schedule possess related working times and thus can not be deleted"
+    end
+
+    Repo.delete(schedule)
+  end
+
+  # ========== HELPERS ===========
+
+  def changeset_error_to_string(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.reduce("", fn {k, v}, acc ->
+      joined_errors = Enum.join(v, "; ")
+      "#{acc}#{k}: #{joined_errors}, "
+    end)
   end
 end

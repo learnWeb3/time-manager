@@ -1,4 +1,5 @@
 defmodule TimeManager.Plugs.Auth do
+  alias TimeManager.Application
 
   def init(default), do: default
 
@@ -9,7 +10,8 @@ defmodule TimeManager.Plugs.Auth do
       if is_nil(token) do
         raise JWTMissingTokenError
       else
-        Map.put(conn, :token, token)
+        decoded = verify_token(token)
+        Map.put(conn, :token, decoded)
       end
     rescue
       e ->
@@ -41,5 +43,9 @@ defmodule TimeManager.Plugs.Auth do
     else
       nil
     end
+  end
+
+  def verify_token(token) do
+    Application.verify_token(token)
   end
 end

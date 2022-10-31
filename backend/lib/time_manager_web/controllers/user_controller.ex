@@ -3,13 +3,68 @@ defmodule TimeManagerWeb.UserController do
 
   alias TimeManager.Application
   alias TimeManager.Application.User
+  alias TimeManager.Application.Role
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
+  # plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
-  def index(conn, _params) do
-    users = Application.list_users()
+  # check user permission using token
+  # roles = Role.get()
+  # plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+
+  # check authorized_params
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "user" => %{
+        "username" => true,
+        "email" => true,
+        "password" => true,
+        "jobtitle" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "id" => true,
+      "user" => %{
+        "username" => true,
+        "email" => true,
+        "password" => true,
+        "jobtitle" => true
+      }
+    }
+    when action in [:update]
+  )
+
+  # check required params
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "user" => %{
+        "username" => true,
+        "email" => true,
+        "password" => true,
+        "jobtitle" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "id" => true
+    }
+    when action in [:update, :delete, :show]
+  )
+
+  def index(conn, params) do
+    users = Application.list_users(params)
     render(conn, "index.json", users: users)
   end
 
@@ -32,23 +87,45 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = Application.get_user!(id)
-    render(conn, "show.json", user: user)
+    try do
+      user = Application.get_user!(id)
+      render(conn, "show.json", user: user)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
+    end
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Application.get_user!(id)
-
-    with {:ok, %User{} = user} <- Application.update_user(user, user_params) do
+    try do
+      user = Application.get_user!(id)
+      {:ok, user} = Application.update_user(user, user_params)
       render(conn, "show.json", user: user)
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    user = Application.get_user!(id)
-
-    with {:ok, %User{}} <- Application.delete_user(user) do
+    try do
+      Application.delete_user(id)
       send_resp(conn, :no_content, "")
+    rescue
+      e ->
+        error = %{message: Exception.message(e)}
+
+        conn
+        |> put_status(:bad_request)
+        |> render(TimeManagerWeb.ErrorView, "error.json", error: error)
     end
   end
 end

@@ -1,34 +1,36 @@
 defmodule TimeManagerWeb.Router do
   use TimeManagerWeb, :router
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {TimeManagerWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+  pipeline :api do
+    plug(:accepts, ["json"])
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
+  pipeline :browser do
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, {TimeManagerWeb.LayoutView, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   scope "/", TimeManagerWeb do
-    pipe_through :browser
+    get("/*path", ErrorController, :not_found)
   end
 
   # Other scopes may use custom stacks.
   scope "/api", TimeManagerWeb do
-    pipe_through :api
-    resources "/users", UserController, except: [:new, :edit]
-    get "/workingtimes/:userId", WorkingTimeController, :index
-    post "/workingtimes/:userId", WorkingTimeController, :create
-    get "/workingtimes/:userId/:id", WorkingTimeController, :show
-    resources "/workingtimes", WorkingTimeController, only: [:update, :delete]
-    get "/clocks/:userId", ClockController, :user_clocks
-    post "/clocks/:userId", ClockController, :create
-    post "/sessions/login", SessionController, :login
+    pipe_through(:api)
+    resources("/users", UserController, except: [:new, :edit])
+    get("/workingtimes/:userId", WorkingTimeController, :index)
+    post("/workingtimes/:userId", WorkingTimeController, :create)
+    delete("/workingtimes/:id", WorkingTimeController, :delete)
+    resources("/schedules", ScheduleController)
+    post("/clocks/:userId", ClockController, :create)
+    get("/clocks/presence", ClockController, :presence)
+    get("/clocks/:userId", ClockController, :user_clocks)
+    post("/sessions/login", SessionController, :login)
+    get("/*path", ErrorController, :not_found)
   end
 
   # Enables LiveDashboard only for development
@@ -42,9 +44,9 @@ defmodule TimeManagerWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      live_dashboard "/dashboard", metrics: TimeManagerWeb.Telemetry
+      live_dashboard("/dashboard", metrics: TimeManagerWeb.Telemetry)
     end
   end
 
@@ -54,9 +56,9 @@ defmodule TimeManagerWeb.Router do
   # node running the Phoenix server.
   if Mix.env() == :dev do
     scope "/dev" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      forward("/mailbox", Plug.Swoosh.MailboxPreview)
     end
   end
 end
