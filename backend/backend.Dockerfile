@@ -1,8 +1,23 @@
-FROM elixir:alpine
+FROM node:alpine as time_manager_front
+
+WORKDIR /front
+
+COPY ../front/package*.json /
+
+RUN npm i -g @quasar/cli
+RUN npm i --no-audit --loglevel verbose
+
+COPY ../front/ /
+
+RUN ["npm", "run", "build"]
+
+
+FROM elixir:alpine as time_manager_back
 
 RUN apk add --no-cache build-base make
 
 COPY . /backend
+COPY --from=time_manager_front /front/dist/spa /backend/priv/static
 
 # move to backend directory
 WORKDIR /backend

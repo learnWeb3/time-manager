@@ -8,7 +8,7 @@ defmodule TimeManager.Application.User do
     field(:jobtitle, :string)
     field(:username, :string)
     field(:password, :string)
-    field(:role, :integer, default: Role.get()["employee"])
+    field(:role, :integer)
 
     timestamps()
   end
@@ -16,8 +16,8 @@ defmodule TimeManager.Application.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :password, :jobtitle])
-    |> validate_required([:username, :email, :password])
+    |> cast(attrs, [:username, :email, :password, :jobtitle, :role])
+    |> validate_required([:username, :email, :password, :role])
     |> validate_format(:email, ~r/^[\w-]+@[\w-]+\.[\w]+$/)
   end
 end

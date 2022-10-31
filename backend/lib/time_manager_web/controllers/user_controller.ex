@@ -7,7 +7,7 @@ defmodule TimeManagerWeb.UserController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  # plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
+  plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
   # check user permission using token
   # roles = Role.get()
@@ -21,7 +21,8 @@ defmodule TimeManagerWeb.UserController do
         "username" => true,
         "email" => true,
         "password" => true,
-        "jobtitle" => true
+        "jobtitle" => true,
+        "role" => true
       }
     }
     when action in [:create]
@@ -35,7 +36,8 @@ defmodule TimeManagerWeb.UserController do
         "username" => true,
         "email" => true,
         "password" => true,
-        "jobtitle" => true
+        "jobtitle" => true,
+        "role" => true
       }
     }
     when action in [:update]
@@ -49,7 +51,8 @@ defmodule TimeManagerWeb.UserController do
         "username" => true,
         "email" => true,
         "password" => true,
-        "jobtitle" => true
+        "jobtitle" => true,
+        "role" => true
       }
     }
     when action in [:create]

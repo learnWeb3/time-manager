@@ -5,7 +5,7 @@ defmodule TimeManagerWeb.ScheduleController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :update, :index])
+  plug(TimeManager.Plugs.Auth, "" when action in [:create, :update, :index, :delete])
 
   # check user permission using token
   roles = Role.get()

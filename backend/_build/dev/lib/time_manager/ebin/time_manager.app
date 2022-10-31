@@ -22,6 +22,7 @@
           'Elixir.TimeManager.Plugs.RequireParams',
           'Elixir.TimeManager.Plugs.RoleGuard','Elixir.TimeManager.Repo',
           'Elixir.TimeManagerWeb','Elixir.TimeManagerWeb.ChangesetView',
+          'Elixir.TimeManagerWeb.ClockController',
           'Elixir.TimeManagerWeb.ClockView','Elixir.TimeManagerWeb.Endpoint',
           'Elixir.TimeManagerWeb.ErrorController',
           'Elixir.TimeManagerWeb.ErrorHelpers',

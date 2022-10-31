@@ -12,8 +12,8 @@ services:
     env_file: .env
     container_name: backend
     build:
-      context: ./backend
-      dockerfile: backend.Dockerfile
+      context: .
+      dockerfile: time-manager.Dockerfile
     ports:
       - 4000:4000
     depends_on:

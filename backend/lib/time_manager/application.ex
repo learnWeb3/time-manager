@@ -606,7 +606,13 @@ defmodule TimeManager.Application do
   def create_schedule(schedule_params) do
     schedule = %Schedule{}
     changeset = Schedule.changeset(schedule, schedule_params)
-    Repo.insert!(changeset)
+
+    if changeset.valid? do
+      {:ok, schedule} = Repo.insert(changeset)
+      schedule
+    else
+      changeset_error_to_string(changeset)
+    end
   end
 
   def delete_schedule(id) do

@@ -14,23 +14,18 @@ defmodule TimeManagerWeb.Router do
     plug(:put_secure_browser_headers)
   end
 
-  scope "/", TimeManagerWeb do
-    get("/*path", ErrorController, :not_found)
-  end
-
   # Other scopes may use custom stacks.
   scope "/api", TimeManagerWeb do
     pipe_through(:api)
+    resources("/schedules", ScheduleController, [:create, :update, :index, :delete])
     resources("/users", UserController, except: [:new, :edit])
     get("/workingtimes/:userId", WorkingTimeController, :index)
     post("/workingtimes/:userId", WorkingTimeController, :create)
     delete("/workingtimes/:id", WorkingTimeController, :delete)
-    resources("/schedules", ScheduleController)
     post("/clocks/:userId", ClockController, :create)
     get("/clocks/presence", ClockController, :presence)
     get("/clocks/:userId", ClockController, :user_clocks)
     post("/sessions/login", SessionController, :login)
-    get("/*path", ErrorController, :not_found)
   end
 
   # Enables LiveDashboard only for development
