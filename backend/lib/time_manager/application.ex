@@ -545,6 +545,8 @@ defmodule TimeManager.Application do
     if is_nil(working_time) do
       raise NotFoundError, message: "working time does not exists using id " <> id
     end
+
+    working_time
   end
 
   def create_working_time(userId, working_time_params) do
@@ -662,6 +664,20 @@ defmodule TimeManager.Application do
   end
 
   # ========== HELPERS ===========
+
+  def owner_manager_or_admin!(%User{} = current_user, userId) do
+    roles = TimeManager.Application.Role.get()
+
+    current_user_id = current_user.id
+    admin_role = roles["admin"]
+    manager_role = roles["manager"]
+    current_user_role = current_user.role
+
+    if current_user_role != manager_role and current_user_role != admin_role and
+         current_user_id != userId do
+      raise RoleMismatchError
+    end
+  end
 
   def changeset_error_to_string(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->

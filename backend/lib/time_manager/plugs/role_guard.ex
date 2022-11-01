@@ -11,9 +11,6 @@ defmodule TimeManager.Plugs.RoleGuard do
       user_id = Map.get(decoded, "sub", nil)
       user = Application.get_user!(user_id)
 
-      IO.inspect(roles)
-      IO.inspect(user.role)
-
       if not Enum.member?(roles, user.role) do
         raise RoleMismatchError
       end

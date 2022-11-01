@@ -11,7 +11,9 @@ defmodule TimeManager.Plugs.Auth do
         raise JWTMissingTokenError
       else
         decoded = verify_token(token)
-        Map.put(conn, :token, decoded)
+        user_id = Map.get(decoded, "sub", nil)
+        current_user = Application.get_user!(user_id)
+        Map.put(conn, :current_user, current_user)
       end
     rescue
       e ->

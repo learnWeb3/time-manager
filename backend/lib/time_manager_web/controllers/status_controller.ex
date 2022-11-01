@@ -28,7 +28,6 @@ defmodule TimeManagerWeb.StatusController do
   def index(conn, _params) do
     try do
       users_status = Application.get_all_user_status()
-      IO.inspect(users_status)
       render(conn, "index.json", status: users_status)
     rescue
       e ->

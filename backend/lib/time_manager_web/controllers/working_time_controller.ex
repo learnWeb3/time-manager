@@ -83,6 +83,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
   def create(conn, %{"userId" => userId, "working_time" => working_time_params}) do
     try do
       {userId, ""} = Integer.parse(userId)
+      Application.owner_manager_or_admin!(conn.current_user, userId)
       working_time = Application.create_working_time(userId, working_time_params)
 
       conn
@@ -100,6 +101,8 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   def delete(conn, %{"id" => id}) do
     try do
+      working_time = Application.get_working_time!(id)
+      Application.owner_manager_or_admin!(conn.current_user, working_time.user_id)
       Application.delete_working_time(id)
       send_resp(conn, :no_content, "")
     rescue
