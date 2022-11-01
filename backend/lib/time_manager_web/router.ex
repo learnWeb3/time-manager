@@ -19,6 +19,8 @@ defmodule TimeManagerWeb.Router do
     pipe_through(:api)
     resources("/schedules", ScheduleController, [:create, :update, :index, :delete])
     resources("/users", UserController, except: [:new, :edit])
+    get("/status/:userId", StatusController, :show)
+    get("/status", StatusController, :index)
     get("/workingtimes/:userId", WorkingTimeController, :index)
     post("/workingtimes/:userId", WorkingTimeController, :create)
     delete("/workingtimes/:id", WorkingTimeController, :delete)

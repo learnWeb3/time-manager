@@ -42,6 +42,42 @@ defmodule TimeManager.Application do
   alias TimeManager.Application.Clock
   alias TimeManager.Application.WorkingTime
 
+  # ========= STATUS  ===========
+
+  def get_all_user_status() do
+    query = """
+    SELECT
+    clocks.user_id,
+    clocks.status
+    FROM clocks
+    WHERE clocks.time
+    IN
+    (SELECT MAX(clocks.time) FROM clocks GROUP BY clocks.user_id)
+    """
+
+    {:ok, result} =
+      Repo.query(
+        query,
+        []
+      )
+
+    Enum.map(result.rows, fn [user_id, status] ->
+      %{"status" => status, "user_id" => user_id}
+    end)
+  end
+
+  def get_user_status(params) do
+    userId = Map.get(params, "userId", nil)
+
+    if is_nil(userId) do
+      raise NotFoundError, message: "user does not exists with id " <> userId
+    end
+
+    last_user_clock = List.first(get_user_last_clocks(userId, 1))
+
+    %{"status" => last_user_clock.status, "user_id" => last_user_clock.user_id}
+  end
+
   # ========= PRSENCE ===========
 
   def get_unix_current_time do
