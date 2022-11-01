@@ -6,6 +6,59 @@ defmodule TimeManagerWeb.ClockController do
 
   plug(TimeManager.Plugs.Auth, "" when action in [:create, :user_clocks])
 
+  # check authorized_params
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "userId" => true,
+      "clock" => %{
+        "time" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "userId" => true,
+      "start" => true,
+      "end" => true,
+      "periodicity" => true
+    }
+    when action in [:presence]
+  )
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "userId" => true
+    }
+    when action in [:user_clocks]
+  )
+
+  # check required params
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "userId" => true,
+      "clock" => %{
+        "time" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "userId" => true
+    }
+    when action in [:user_clocks]
+  )
+
+  # controller actions
+
   def presence(conn, params) do
     try do
       presences = Application.get_presence(params)

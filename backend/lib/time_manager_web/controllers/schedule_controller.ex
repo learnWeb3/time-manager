@@ -11,11 +11,89 @@ defmodule TimeManagerWeb.ScheduleController do
   roles = Role.get()
   plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
 
-  def index(conn, params) do
+  # check authorized params
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "schedule" => %{
+        "endhour" => true,
+        "endminute" => true,
+        "starthour" => true,
+        "startminute" => true,
+        "weekday" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "id" => true,
+      "schedule" => %{
+        "endhour" => true,
+        "endminute" => true,
+        "starthour" => true,
+        "startminute" => true,
+        "weekday" => true
+      }
+    }
+    when action in [:update]
+  )
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "id" => true
+    }
+    when action in [:delete]
+  )
+
+  # check required params
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "schedule" => %{
+        "endhour" => true,
+        "endminute" => true,
+        "starthour" => true,
+        "startminute" => true,
+        "weekday" => true
+      }
+    }
+    when action in [:create]
+  )
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "id" => true,
+      "schedule" => %{
+        "endhour" => true,
+        "endminute" => true,
+        "starthour" => true,
+        "startminute" => true,
+        "weekday" => true
+      }
+    }
+    when action in [:update]
+  )
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "id" => true
+    }
+    when action in [:delete]
+  )
+
+  # controller actions
+
+  def index(conn, _params) do
     try do
-      startDate = Map.get(params, "start", nil)
-      endDate = Map.get(params, "end", nil)
-      schedules = Application.list_schedules(startDate, endDate)
+      schedules = Application.list_schedules()
 
       conn
       |> put_status(:created)

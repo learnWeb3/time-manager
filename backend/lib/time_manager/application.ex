@@ -543,52 +543,13 @@ defmodule TimeManager.Application do
   end
 
   # =========  SCHEDULES  ============
-  def list_schedules(startDate, endDate) do
-    cond do
-      is_nil(startDate) and is_nil(endDate) ->
-        query =
-          from(schedule in Schedule,
-            order_by: [desc: schedule.inserted_at]
-          )
+  def list_schedules() do
+    query =
+      from(schedule in Schedule,
+        order_by: [desc: schedule.inserted_at]
+      )
 
-        Repo.all(query)
-
-      is_nil(startDate) and String.length(endDate) > 0 ->
-        {endDate, ""} = Integer.parse(endDate)
-
-        query =
-          from(schedule in Schedule,
-            where: schedule.end >= ^endDate,
-            order_by: [desc: schedule.inserted_at]
-          )
-
-        Repo.all(query)
-
-      String.length(startDate) > 0 and is_nil(endDate) ->
-        {startDate, ""} = Integer.parse(startDate)
-
-        query =
-          from(schedule in Schedule,
-            where: schedule.start >= ^startDate,
-            order_by: [desc: schedule.inserted_at]
-          )
-
-        Repo.all(query)
-
-      String.length(startDate) > 0 and String.length(endDate) > 0 ->
-        {endDate, ""} = Integer.parse(endDate)
-        {startDate, ""} = Integer.parse(startDate)
-
-        query =
-          from(schedule in Schedule,
-            where:
-              schedule.start >= ^startDate and
-                schedule.end >= ^endDate,
-            order_by: [desc: schedule.inserted_at]
-          )
-
-        Repo.all(query)
-    end
+    Repo.all(query)
   end
 
   def update_schedule(id, schedule_params) do

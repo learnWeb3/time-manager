@@ -4,6 +4,30 @@ defmodule TimeManagerWeb.SessionController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
+  # check authorized parameters
+
+  plug(
+    TimeManager.Plugs.AuthorizeParams,
+    %{
+      "email" => true,
+      "password" => true
+    }
+    when action in [:login]
+  )
+
+  # check required parameters
+
+  plug(
+    TimeManager.Plugs.RequireParams,
+    %{
+      "email" => true,
+      "password" => true
+    }
+    when action in [:login]
+  )
+
+  # controller actions
+
   def login(conn, %{"email" => email, "password" => password}) do
     try do
       token = Application.sign_in(email, password)
