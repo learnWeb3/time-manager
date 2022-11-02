@@ -4,6 +4,9 @@ defmodule TimeManagerWeb.SessionController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
+  # auth middleware
+  plug(TimeManager.Plugs.Auth, "" when action in [:whoami])
+
   # check authorized parameters
 
   plug(
@@ -30,12 +33,11 @@ defmodule TimeManagerWeb.SessionController do
 
   def login(conn, %{"email" => email, "password" => password}) do
     try do
-      token = Application.sign_in(email, password)
-      session = %{token: token}
+      sign_in_claim = Application.sign_in(email, password)
 
       conn
       |> put_status(:created)
-      |> render("session.json", session: session)
+      |> render("session.json", session: sign_in_claim)
     rescue
       e ->
         error = %{message: Exception.message(e)}

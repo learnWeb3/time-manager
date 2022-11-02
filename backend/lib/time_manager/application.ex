@@ -48,7 +48,8 @@ defmodule TimeManager.Application do
     query = """
     SELECT
     clocks.user_id,
-    clocks.status
+    clocks.status,
+    clocks.time
     FROM clocks
     WHERE clocks.time
     IN
@@ -61,8 +62,8 @@ defmodule TimeManager.Application do
         []
       )
 
-    Enum.map(result.rows, fn [user_id, status] ->
-      %{"status" => status, "user_id" => user_id}
+    Enum.map(result.rows, fn [user_id, status, time] ->
+      %{"status" => status, "user_id" => user_id, "time" => time}
     end)
   end
 
@@ -75,7 +76,11 @@ defmodule TimeManager.Application do
 
     last_user_clock = List.first(get_user_last_clocks(userId, 1))
 
-    %{"status" => last_user_clock.status, "user_id" => last_user_clock.user_id}
+    %{
+      "status" => last_user_clock.status,
+      "user_id" => last_user_clock.user_id,
+      "time" => last_user_clock.time
+    }
   end
 
   # ========= PRSENCE ===========
@@ -292,7 +297,9 @@ defmodule TimeManager.Application do
 
     if check do
       extra_claims = %{"sub" => user.id}
-      TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
+      token = TimeManager.Application.JwtToken.generate_and_sign!(extra_claims)
+
+      %{user: user, token: token}
     else
       raise ValidationError, message: "invalid credentials"
     end

@@ -7,8 +7,17 @@ defmodule TimeManagerWeb.SessionView do
   end
 
   def render("session.json", %{session: session}) do
+    user = session.user
+
     %{
-      token: session.token
+      token: session.token,
+      user: %{
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        jobtitle: user.jobtitle,
+        role: user.role
+      }
     }
   end
 end

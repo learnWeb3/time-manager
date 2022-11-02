@@ -13,7 +13,8 @@ defmodule TimeManagerWeb.StatusView do
   def render("status.json", %{status: status}) do
     %{
       status: status["status"],
-      userId: status["user_id"]
+      userId: status["user_id"],
+      time: status["time"],
     }
   end
 end

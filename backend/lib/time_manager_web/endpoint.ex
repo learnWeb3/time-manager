@@ -16,7 +16,12 @@ defmodule TimeManagerWeb.Endpoint do
 
   # configure the CORS policy
   #  ["http://foo.com", "http://bar.com"]
-  plug(Corsica, max_age: 600, origins: "*")
+  plug(Corsica,
+    max_age: 600,
+    origins: "*",
+    allow_headers: :all,
+    allow_credentials: true
+  )
 
   # Serve at "/" the static files from "priv/static" directory.
   #
