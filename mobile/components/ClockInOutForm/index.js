@@ -4,6 +4,8 @@ import { Avatar, Button, Text } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import { createClock, getUserStatus } from '../../http/api';
 import { useAlert } from '../../hooks/alert';
+import Logo from '../Logo/index';
+import { ApplicationDate } from '../../date/index';
 
 const toAbbreviateIconLabel = (string = "") => string.slice(0, 2).toUpperCase()
 
@@ -28,7 +30,7 @@ const CLockInOutForm = () => {
         if (status && status.time && status.status && !timeIntervalRef) {
             setTimeIntervalRef(
                 setInterval(() => {
-                    setElapsedTimeSinceArrival(calculateElapsedTimeSinceArrival(status.time))
+                    setElapsedTimeSinceArrival(ApplicationDate.calculateElapsedTimeSince(status.time))
                 }, 1000)
             )
         }
@@ -76,36 +78,28 @@ const CLockInOutForm = () => {
         }
     }
 
-    const calculateElapsedTimeSinceArrival = (arrivalTimeSeconds) => {
-        const elapsedTimeSeconds = Math.round(Date.now() / 1000) - arrivalTimeSeconds
-        const hours = Math.floor(elapsedTimeSeconds / 3600)
-        const minutes = Math.floor((elapsedTimeSeconds - (hours * 3600)) / 60)
-        const seconds = Math.floor(elapsedTimeSeconds - ((hours * 3600) + (minutes * 60)))
-        return {
-            hours,
-            minutes,
-            seconds
-        }
-    }
-
     return (
         <>
             <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                    <Text style={{ fontWeight: 900 }} variant="headlineMedium">Welcome !</Text>
+                </View>
                 <View style={styles.avatarContainer}>
-                    <Avatar.Text size={200} label={
+                    <Avatar.Text style={{ marginBottom: 16 }} size={160} label={
                         toAbbreviateIconLabel(currentUser ? currentUser.user.email : "")
                     } />
+                    <Text style={{ fontWeight: 900 }} variant="titleMedium">{currentUser.user.username}</Text>
                 </View>
-                <View style={styles.elapsedTimeContainer}>
-                    {elapsedTimeSinceArrival &&
-                        <Text variant="headlineMedium">
-                            {elapsedTimeSinceArrival.hours}:
-                            {elapsedTimeSinceArrival.minutes}:
-                            {elapsedTimeSinceArrival.seconds}
-                        </Text>
-                    }
-                </View>
-                {status && <Button mode="contained" onPress={handleSubmit}>
+
+                {elapsedTimeSinceArrival && <View style={styles.elapsedTimeContainer}>
+                    <Text variant="headlineMedium">
+                        {elapsedTimeSinceArrival.hours}:
+                        {elapsedTimeSinceArrival.minutes}:
+                        {elapsedTimeSinceArrival.seconds}
+                    </Text>
+                </View>}
+
+                {status && <Button style={{ marginBottom: 24 }} buttonColor='green' icon="clock" mode="contained" onPress={handleSubmit}>
                     {!status.status ? "Just arrived !" : "Going back home !"}
                 </Button>}
             </View>
@@ -115,8 +109,14 @@ const CLockInOutForm = () => {
 };
 
 const styles = StyleSheet.create({
+    headerContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 24
+    },
     container: {
         width: "100%",
+        position: "relative"
     },
     avatarContainer: {
         width: "100%",

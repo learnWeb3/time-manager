@@ -45,3 +45,7 @@ export const createClock = (token, userId, data = {
 }) => mergeAuthHeaders(httpApi, token)
     .post(`/clocks/${userId}`, data)
     .then((response) => response.data)
+
+export const getUserClocks = (token, userId) => mergeAuthHeaders(httpApi, token)
+    .get(`/clocks/${userId}`)
+    .then((response) => response.data)
