@@ -2,7 +2,14 @@
   <div>
     <q-header elevated style="background-color: #001f54">
       <q-toolbar class="flex justify-between">
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="leftDrawerOpen = !leftDrawerOpen" />
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          aria-label="Menu"
+          @click="leftDrawerOpen = !leftDrawerOpen"
+        />
 
         <div>
           <q-avatar>
@@ -16,99 +23,204 @@
       <q-list>
         <q-item-label header class="flex justify-center q-mt-sm">
           <span style="font-size: 1.5em; color: #0a1128">{{
-              store.user.username
+            store.user.username
           }}</span>
         </q-item-label>
 
         <LeftMenu />
       </q-list>
     </q-drawer>
-    <q-stepper v-model="store.stepUser" ref="stepper" animated style="min-height: 100vh">
+    <q-stepper
+      v-model="store.stepUser"
+      ref="stepper"
+      animated
+      style="min-height: 100vh"
+    >
       <q-step :name="1" title="User Detail" :done="store.step > 1">
         <div class="col-12 row justify-center q-mx-xl q-my-xl">
           <div class="col-10 row">
             <div class="col-12">
-              <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Detail</span>
+              <span
+                class="text-weight-bold"
+                style="font-size: 1.5em; color: #001f54"
+                >Detail</span
+              >
             </div>
             <q-slide-transition appear>
-              <div v-show="store.userEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.userEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-2 q-ml-xl q-mt-xl">
-                  <span class="text-weight-bold" style="font-size: 1.3em; color: #001f54">Username :</span>
+                  <span
+                    class="text-weight-bold"
+                    style="font-size: 1.3em; color: #001f54"
+                    >Username :</span
+                  >
                 </div>
                 <div class="col-6 q-mt-xl">
-                  <span style="font-size: 1.3em; color: #001f54" class="text-weight-light q-pl-xl">{{
-                      store.user.username
-                  }}</span>
+                  <span
+                    style="font-size: 1.3em; color: #001f54"
+                    class="text-weight-light q-pl-xl"
+                    >{{ store.user.username }}</span
+                  >
                 </div>
               </div>
             </q-slide-transition>
             <q-slide-transition appear>
-              <div v-show="store.userEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.userEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-2 q-ml-xl q-mt-xl">
-                  <span class="text-weight-bold" style="font-size: 1.3em; color: #001f54">Email :</span>
+                  <span
+                    class="text-weight-bold"
+                    style="font-size: 1.3em; color: #001f54"
+                    >Email :</span
+                  >
                 </div>
                 <div class="col-6 q-mt-xl">
-                  <span style="font-size: 1.3em; color: #001f54" class="text-weight-light q-pl-xl">{{ store.user.email
-                  }}</span>
+                  <span
+                    style="font-size: 1.3em; color: #001f54"
+                    class="text-weight-light q-pl-xl"
+                    >{{ store.user.email }}</span
+                  >
                 </div>
               </div>
             </q-slide-transition>
             <q-slide-transition appear>
-              <div v-show="store.userEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.userEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-2 q-ml-xl q-mt-xl">
-                  <span class="text-weight-bold" style="font-size: 1.3em; color: #001f54">Profession :</span>
+                  <span
+                    class="text-weight-bold"
+                    style="font-size: 1.3em; color: #001f54"
+                    >Profession :</span
+                  >
                 </div>
                 <div class="col-6 q-mt-xl">
-                  <span style="font-size: 1.3em; color: #001f54" class="text-weight-light q-pl-xl">{{
-                      store.user.profession
-                  }}</span>
+                  <span
+                    style="font-size: 1.3em; color: #001f54"
+                    class="text-weight-light q-pl-xl"
+                    >{{ store.user.jobtitle }}</span
+                  >
                 </div>
               </div>
             </q-slide-transition>
             <q-slide-transition appear>
-              <div v-show="store.inputEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.userEdit"
+                class="col-12 row items-center justify-center"
+              >
+                <div class="col-2 q-ml-xl q-mt-xl">
+                  <span
+                    class="text-weight-bold"
+                    style="font-size: 1.3em; color: #001f54"
+                    >Role :</span
+                  >
+                </div>
+                <div class="col-6 q-mt-xl">
+                  <span
+                    style="font-size: 1.3em; color: #001f54"
+                    class="text-weight-light q-pl-xl"
+                    >{{ CheckRole() }}</span
+                  >
+                </div>
+              </div>
+            </q-slide-transition>
+            <q-slide-transition appear>
+              <div
+                v-show="store.inputEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-8 q-ml-xl q-mt-xl">
-                  <q-input outlined v-model="store.user.username" label="Username" />
+                  <q-input
+                    outlined
+                    v-model="store.user.username"
+                    label="Username"
+                  />
                 </div>
               </div>
             </q-slide-transition>
             <q-slide-transition appear>
-              <div v-show="store.inputEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.inputEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-8 q-ml-xl q-mt-lg">
                   <q-input outlined v-model="store.user.email" label="Email" />
                 </div>
               </div>
             </q-slide-transition>
             <q-slide-transition appear>
-              <div v-show="store.inputEdit" class="col-12 row items-center justify-center">
+              <div
+                v-show="store.inputEdit"
+                class="col-12 row items-center justify-center"
+              >
                 <div class="col-8 q-ml-xl q-mt-lg">
-                  <q-input outlined v-model="store.user.profession" label="Profession" />
+                  <q-input
+                    outlined
+                    v-model="store.user.jobtitle"
+                    label="Profession"
+                  />
+                </div>
+              </div>
+            </q-slide-transition>
+            <q-slide-transition appear>
+              <div
+                v-show="store.inputEdit"
+                class="col-12 row items-center justify-center"
+              >
+                <div class="col-8 q-ml-xl q-mt-lg">
+                  <q-select
+                    outlined
+                    v-model="store.user.role"
+                    emit-value
+                    map-options
+                    option-label="name"
+                    :options="store.role"
+                    label="Role"
+                  />
                 </div>
               </div>
             </q-slide-transition>
             <div class="col-12 row items-center justify-center">
               <div class="col-8 flex justify-center q-mt-xl">
-                <q-btn unelevated style="background-color: #001f54; color: white"
+                <q-btn
+                  unelevated
+                  style="background-color: #001f54; color: white"
                   :label="store.userEdit === true ? 'Edit User' : 'Validate'"
-                  :icon-right="store.userEdit === true ? 'edit' : 'check'" @click="
+                  :icon-right="store.userEdit === true ? 'edit' : 'check'"
+                  @click="
                     (store.userEdit = !store.userEdit),
-                    (store.inputEdit = !store.inputEdit)
-                  " />
+                      (store.inputEdit = !store.inputEdit),
+                      store.userEdit === true ? UpdateUser() : null
+                  "
+                />
               </div>
             </div>
           </div>
           <div class="col-10 q-mt-xl row">
             <div class="col-12 q-mt-xl">
-              <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Danger Zone</span>
+              <span
+                class="text-weight-bold"
+                style="font-size: 1.5em; color: #001f54"
+                >Danger Zone</span
+              >
             </div>
             <div class="col-12 row items-center justify-center">
               <div class="col-8 justify-start text-center q-mt-xl">
-                <span class="text-weight-light" style="font-size: 1.3em; color: #001f54">This action will permanently
-                  delete the user from the Time
-                  Manager platform and database.</span>
+                <span
+                  class="text-weight-light"
+                  style="font-size: 1.3em; color: #001f54"
+                  >This action will permanently delete the user from the Time
+                  Manager platform and database.</span
+                >
               </div>
               <div class="col-8 flex justify-center q-mt-lg">
-                <q-btn unelevated color="negative" label="Delete User" />
+                <q-btn unelevated color="negative" label="Delete User" @click="DeleteUser()" />
               </div>
             </div>
           </div>
@@ -118,31 +230,70 @@
         <div class="col-12 q-px-xl q-my-md">
           <div class="row">
             <div class="col-2 row q-mt-md">
-              <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Dashboard</span>
+              <span
+                class="text-weight-bold"
+                style="font-size: 1.5em; color: #001f54"
+                >Dashboard</span
+              >
             </div>
             <div class="col-4 row q-mt-md justify-between justify-center">
               <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Weekly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Weekly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Weekly" @click="store.menu = 'Weekly', store.stepUser = 2"/>
+                <q-btn
+                  :outline="store.menu === 'Weekly' ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menu === 'Weekly'
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Weekly"
+                  @click="(store.menu = 'Weekly'), (store.stepUser = 2)"
+                />
               </div>
               <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Monthly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Monthly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Monthly" @click="store.menu = 'Monthly', store.stepUser = 2"/>
+                <q-btn
+                  :outline="store.menu === 'Monthly' ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menu === 'Monthly'
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Monthly"
+                  @click="(store.menu = 'Monthly'), (store.stepUser = 2)"
+                />
               </div>
               <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Yearly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Yearly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Yearly" @click="store.menu = 'Yearly', store.stepUser = 2"/>
+                <q-btn
+                  :outline="store.menu === 'Yearly' ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menu === 'Yearly'
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Yearly"
+                  @click="(store.menu = 'Yearly'), (store.stepUser = 2)"
+                />
               </div>
-              
             </div>
           </div>
 
           <div class="col-12 row q-mt-md">
-            <div class="col-12 q-mt-md ">
+            <div class="col-12 q-mt-md">
               <BarChart />
             </div>
             <div class="col-12 q-mt-md">
               <PieChart />
             </div>
           </div>
-          <div class="col-12 q-mt-md row ">
+          <div class="col-12 q-mt-md row">
             <LineChart />
           </div>
         </div>
@@ -156,14 +307,18 @@ import { defineComponent, ref } from "vue";
 import LeftMenu from "src/components/LeftMenu.vue";
 import { useGlobalStore } from "stores/global";
 import BarChart from "src/components/Charts/BarChart.vue";
-import LineChart from "src/components/Charts/LineChart.vue"
-import PieChart from "src/components/Charts/PieChart.vue"
+import LineChart from "src/components/Charts/LineChart.vue";
+import PieChart from "src/components/Charts/PieChart.vue";
+import axios from "axios";
 
 export default defineComponent({
   name: "UserDetail",
 
   components: {
-    LeftMenu, BarChart, LineChart, PieChart
+    LeftMenu,
+    BarChart,
+    LineChart,
+    PieChart,
   },
 
   setup() {
@@ -174,6 +329,72 @@ export default defineComponent({
       leftDrawerOpen,
       store,
     };
+  },
+
+  methods: {
+    CheckRole() {
+      switch (this.store.user.role) {
+        case 1:
+          return "Admin";
+        case 2:
+          return "Manager";
+        case 3:
+          return "User";
+        default:
+          return this.store.user.role.name;
+      }
+    },
+    async UpdateUser() {
+      if (this.store.user.role.name) {
+        this.store.user.role = this.store.user.role.value;
+      }
+      var data = JSON.stringify({
+        user: {
+          role: this.store.user.role,
+          username: this.store.user.username,
+          email: this.store.user.email,
+          password: this.store.user.password,
+        },
+      });
+
+      var config = {
+        method: "put",
+        url: "http://localhost:4000/api/users/" + this.store.user.id,
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2Njc0MDE0NzMsImlhdCI6MTY2NzM5Nzg3MywiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNocnVvanVha3F1cHFsN2dzMDAwMTgyIiwibmJmIjoxNjY3Mzk3ODczLCJzdWIiOjF9.nN8BY55V6pFQ2mIbiFfXkh3DpXpReS9A3w1jyhI-jpI.3_N0M3fcV7QOWSYMkEghG5zZbASLeCU8bzQYQK0IHNA",
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    async DeleteUser() {
+      var config = {
+        method: "delete",
+        url: "http://localhost:4000/api/users/" + this.store.user.id,
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2NjczMjk0MTksImlhdCI6MTY2NzMyNTgxOSwiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNob2Z2dTBwa2EzMjg0dDY0MDAwM24yIiwibmJmIjoxNjY3MzI1ODE5LCJzdWIiOjF9.3_N0M3fcV7QOWSYMkEghG5zZbASLeCU8bzQYQK0IHNA",
+        },
+      };
+
+      axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+        this.store.step = 1
+    },
   },
 });
 </script>

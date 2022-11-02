@@ -12,9 +12,26 @@ export const useGlobalStore = defineStore("global", {
     createUser: {
       username: "",
       email: "",
-      profession: "",
+      password: "",
+      jobtitle: "",
+      role: "",
     },
-    selectedUser: null
+    selectedUser: null,
+    allUser: null,
+    role: [
+      {
+        name: "Admin",
+        value: 1,
+      },
+      {
+        name: "Manager",
+        value: 2,
+      },
+      {
+        name: "User",
+        value: 3,
+      },
+    ]
   }),
   getters: {},
   actions: {},
