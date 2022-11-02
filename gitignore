@@ -1,6 +1,8 @@
 backend/deps
 backend/_build
 backend/data
+mobile/node_modules
+node_modules
 deps
 _build
 
