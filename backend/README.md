@@ -44,6 +44,12 @@ Credentials
   * email: "admin@yopmail.com"
   * password: "foobar"
 
+### Roles
+
+  * admin" => 1
+  * manager => 2
+  * employee" => 3
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/

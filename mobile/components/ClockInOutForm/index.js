@@ -19,7 +19,7 @@ const CLockInOutForm = () => {
 
     React.useEffect(() => {
         if (currentUser) {
-            getUserStatus(currentUser.token, currentUser.user.id).then((status) => setStatus(status.data))
+            getUserStatus(currentUser.token, currentUser.user.id).then((status) => setStatus(status.data ? status.data : "no data"))
         }
     }, [currentUser])
 

@@ -1,14 +1,15 @@
-backend/deps
-backend/_build
-backend/data
-mobile/node_modules
-node_modules
-deps
-_build
+# backend folder
+
+/backend/deps/
+/backend/_build/
+/backend/data/
+
+# mobile folder
+/mobile/node_modules/
 
 .DS_Store
 .thumbs.db
-node_modules
+node_modules/
 
 # Quasar core related directories
 .quasar

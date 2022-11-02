@@ -76,11 +76,15 @@ defmodule TimeManager.Application do
 
     last_user_clock = List.first(get_user_last_clocks(userId, 1))
 
-    %{
-      "status" => last_user_clock.status,
-      "user_id" => last_user_clock.user_id,
-      "time" => last_user_clock.time
-    }
+    if is_nil(last_user_clock) do
+      last_user_clock
+    else
+      %{
+        "status" => last_user_clock.status,
+        "user_id" => last_user_clock.user_id,
+        "time" => last_user_clock.time
+      }
+    end
   end
 
   # ========= PRSENCE ===========
