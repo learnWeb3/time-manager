@@ -49,7 +49,13 @@
             />
           </div>
           <div class="col-8 q-mt-lg">
-            <q-select outlined v-model="model" :options="store.role" label="Role" @update:model-value="store.createUser.role = model.value" />
+            <q-select
+              outlined
+              v-model="model"
+              :options="store.role"
+              label="Role"
+              @update:model-value="store.createUser.role = model.value"
+            />
           </div>
         </div>
       </q-card-section>
@@ -94,8 +100,7 @@ export default defineComponent({
         method: "get",
         url: "http://localhost:4000/api/users",
         headers: {
-          Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2NjczODcwMzYsImlhdCI6MTY2NzM4MzQzNiwiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNocm9wbDExcGcyYXNkcjgwMDAwMTYyIiwibmJmIjoxNjY3MzgzNDM2LCJzdWIiOjF9.XF4UmHoK5KKIFuWAN9RpdbWiSq6_ZRfxsz8MERgKp64",
+          Authorization: "Bearer " + this.store.jwt,
         },
       };
       await axios(config)
@@ -124,8 +129,7 @@ export default defineComponent({
         method: "post",
         url: "http://localhost:4000/api/users",
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2NjczODcwMzYsImlhdCI6MTY2NzM4MzQzNiwiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNocm9wbDExcGcyYXNkcjgwMDAwMTYyIiwibmJmIjoxNjY3MzgzNDM2LCJzdWIiOjF9.XF4UmHoK5KKIFuWAN9RpdbWiSq6_ZRfxsz8MERgKp64",
+          Authorization: "Bearer " + this.store.jwt,
           "Content-Type": "application/json",
         },
         data: data,
@@ -138,7 +142,7 @@ export default defineComponent({
         .catch(function (error) {
           console.log(error);
         });
-        this.GetAllUser();
+      this.GetAllUser();
     },
   },
 });

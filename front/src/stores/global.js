@@ -1,8 +1,12 @@
 import { defineStore } from "pinia";
+import { LocalStorage } from 'quasar'
 
 export const useGlobalStore = defineStore("global", {
   state: () => ({
+    jwt: LocalStorage.getItem("JWT"),
     step: 1,
+    stepLanding: 1,
+    avatar: null,
     user: null,
     menu: 'User Detail',
     userEdit: true,

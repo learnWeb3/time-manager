@@ -13,7 +13,29 @@
 
         <div>
           <q-avatar>
-            <img src="https://cdn.quasar.dev/img/avatar.png" />
+            <img :src="this.store.avatar" />
+            <q-menu>
+              <div class="row no-wrap q-pa-md">
+                <div class="column items-center">
+                  <q-avatar size="72px">
+                    <img :src="this.store.avatar" />
+                  </q-avatar>
+
+                  <div class="text-subtitle1 q-mt-sm q-mb-xs">
+                    {{ this.store.user.username }}
+                  </div>
+
+                  <q-btn
+                    color="primary"
+                    label="Go Back"
+                    unelevated
+                    size="sm"
+                    @click="GoBack()"
+                    v-close-popup
+                  />
+                </div>
+              </div>
+            </q-menu>
           </q-avatar>
         </div>
       </q-toolbar>
@@ -220,7 +242,12 @@
                 >
               </div>
               <div class="col-8 flex justify-center q-mt-lg">
-                <q-btn unelevated color="negative" label="Delete User" @click="DeleteUser()" />
+                <q-btn
+                  unelevated
+                  color="negative"
+                  label="Delete User"
+                  @click="DeleteUser()"
+                />
               </div>
             </div>
           </div>
@@ -310,6 +337,7 @@ import BarChart from "src/components/Charts/BarChart.vue";
 import LineChart from "src/components/Charts/LineChart.vue";
 import PieChart from "src/components/Charts/PieChart.vue";
 import axios from "axios";
+import { LocalStorage } from 'quasar'
 
 export default defineComponent({
   name: "UserDetail",
@@ -332,6 +360,9 @@ export default defineComponent({
   },
 
   methods: {
+    GoBack() {
+      this.store.step = 1;
+    },
     CheckRole() {
       switch (this.store.user.role) {
         case 1:
@@ -348,22 +379,20 @@ export default defineComponent({
       if (this.store.user.role.name) {
         this.store.user.role = this.store.user.role.value;
       }
-      var data = JSON.stringify({
+      var data = {
         user: {
           role: this.store.user.role,
           username: this.store.user.username,
           email: this.store.user.email,
           password: this.store.user.password,
         },
-      });
+      };
 
       var config = {
         method: "put",
         url: "http://localhost:4000/api/users/" + this.store.user.id,
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2Njc0MDE0NzMsImlhdCI6MTY2NzM5Nzg3MywiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNocnVvanVha3F1cHFsN2dzMDAwMTgyIiwibmJmIjoxNjY3Mzk3ODczLCJzdWIiOjF9.nN8BY55V6pFQ2mIbiFfXkh3DpXpReS9A3w1jyhI-jpI.3_N0M3fcV7QOWSYMkEghG5zZbASLeCU8bzQYQK0IHNA",
-          "Content-Type": "application/json",
+          Authorization: "Bearer " + this.store.jwt,
         },
         data: data,
       };
@@ -381,8 +410,7 @@ export default defineComponent({
         method: "delete",
         url: "http://localhost:4000/api/users/" + this.store.user.id,
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0aW1lLW1hbmFnZXIiLCJleHAiOjE2NjczMjk0MTksImlhdCI6MTY2NzMyNTgxOSwiaXNzIjoidGltZS1tYW5hZ2VyIiwianRpIjoiMnNob2Z2dTBwa2EzMjg0dDY0MDAwM24yIiwibmJmIjoxNjY3MzI1ODE5LCJzdWIiOjF9.3_N0M3fcV7QOWSYMkEghG5zZbASLeCU8bzQYQK0IHNA",
+          Authorization: "Bearer " + this.store.jwt,
         },
       };
 
@@ -393,7 +421,7 @@ export default defineComponent({
         .catch(function (error) {
           console.log(error);
         });
-        this.store.step = 1
+      this.store.step = 1;
     },
   },
 });
