@@ -159,7 +159,8 @@ const styles = StyleSheet.create({
         marginBottom: 24
     },
     container: {
-        width: "100%"
+        width: "100%",
+        padding:24
     },
 });
 

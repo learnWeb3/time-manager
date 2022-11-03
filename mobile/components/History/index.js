@@ -1,25 +1,32 @@
 import * as React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { getUserClocks } from '../../http/api';
 import ClockInOutListItem from '../ClockInOutListItem';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Button } from 'react-native-paper';
 import { ApplicationDate } from '../../date/index';
+import { setCurrentUserClocks } from '../../stores/reducers/currentUserClocksReducer';
 
 const History = () => {
 
+    const dispatch = useDispatch()
+    const currentUserClocks = useSelector((state) => state.currentUserClocks.value)
     const currentUser = useSelector((state) => state.currentUser.value)
-    const [clocks, setClocks] = React.useState([])
     const [displayedClocks, setDisplayedClocks] = React.useState([])
     const [selectedFilter, setSelectedFilter] = React.useState(true)
 
     React.useEffect(() => {
-        const _displayedClocks = clocks.filter((clock) => clock.status === selectedFilter)
+        const _displayedClocks = currentUserClocks.filter((clock) => clock.status === selectedFilter)
         setDisplayedClocks(_displayedClocks)
-    }, [clocks, selectedFilter])
+    }, [currentUserClocks, selectedFilter])
+
     React.useEffect(() => {
         if (currentUser) {
-            getUserClocks(currentUser.token, currentUser.user.id).then((userClocks) => setClocks(userClocks.data))
+            getUserClocks(currentUser.token, currentUser.user.id)
+                .then((userClocks) =>
+                    dispatch(
+                        setCurrentUserClocks(userClocks.data)
+                    ))
         }
     }, [currentUser])
 
@@ -30,20 +37,20 @@ const History = () => {
     return (
         <>
             <View style={styles.filterContainer}>
-                <Button color={"primary"} style={{ marginRight: 8 }} mode={selectedFilter ? "contained" : "outlined"} onPress={() => setSelectedFilter(true)}>
+                <Button textColor={selectedFilter === true ? "#FFF" : "#5393ff"} style={{ marginRight: 8 }} mode={selectedFilter ? "contained" : "text"} onPress={() => setSelectedFilter(true)}>
                     arrival
                 </Button>
-                <Button style={{ marginRight: 8 }} mode={selectedFilter ? "outlined" : "contained"} onPress={() => setSelectedFilter(false)}>
+                <Button textColor={selectedFilter === false ? "#FFF" : "#5393ff"} style={{ marginRight: 8 }} mode={selectedFilter ? "text" : "contained"} onPress={() => setSelectedFilter(false)}>
                     departure
                 </Button>
             </View>
-            <View style={styles.clocksListContainer}>
+            <ScrollView style={styles.clocksListContainer}>
                 <FlatList
                     data={displayedClocks}
                     renderItem={renderClock}
                     keyExtractor={item => item.id}
                 />
-            </View>
+            </ScrollView>
         </>
 
     )
@@ -51,14 +58,16 @@ const History = () => {
 
 const styles = StyleSheet.create({
     clocksListContainer: {
-
+        height: "100%"
     },
     filterContainer: {
         alignItems: "center",
         justifyContent: "start",
         display: "flex",
         flexDirection: "row",
-        marginBottom: 24
+        marginTop: 16,
+        marginBottom: 16,
+        marginLeft: 16
     }
 })
 

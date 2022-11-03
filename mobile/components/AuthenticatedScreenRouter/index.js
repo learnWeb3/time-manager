@@ -1,5 +1,4 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react'
 import ClockInOutScreen from '../../screens/ClockInOutScreen';
 import { routes } from '../../routes/index';
@@ -9,8 +8,6 @@ import DashboardScreen from '../../screens/DashboardScreen/index';
 import HistoryScreen from '../../screens/HistoryScreen';
 
 const Tab = createBottomTabNavigator();
-
-const Stack = createNativeStackNavigator();
 
 export default function AuthenticatedScreenRouter() {
     return (

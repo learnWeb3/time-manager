@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Service } from 'axios-middleware';
 import { env } from '../env/index';
 import { setCurrentUser } from "../stores/reducers/currentUserReducer";
 import { LocalStorage } from '../localstorage/index';
@@ -10,18 +9,14 @@ const httpApi = axios.create({
     headers: { 'Content-Type': 'application/json' }
 });
 
-
-const service = new Service(httpApi);
-
-service.register({
-    onResponse(response) {
-        if (response && response.status && response.status === 401) {
-            alert('test')
-            LocalStorage.removeData(env.LOCAL_STORAGE_CURRENT_USER_KEY)
-                .then(() => setCurrentUser(null))
-        }
-        return response;
+httpApi.interceptors.response.use(function (response) {
+    return response;
+}, function (error) {
+    if (error.response.status === 401) {
+        LocalStorage.removeData(env.LOCAL_STORAGE_CURRENT_USER_KEY)
+            .then(() => setCurrentUser(null))
     }
+    return Promise.reject(error);
 });
 
 
@@ -48,4 +43,8 @@ export const createClock = (token, userId, data = {
 
 export const getUserClocks = (token, userId) => mergeAuthHeaders(httpApi, token)
     .get(`/clocks/${userId}`)
+    .then((response) => response.data)
+
+export const getUserPresences = (token, userId, periodicity = "day") => mergeAuthHeaders(httpApi, token)
+    .get(`/clocks/presence?userId=${userId}&periodicity=${periodicity}`)
     .then((response) => response.data)

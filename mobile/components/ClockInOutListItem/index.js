@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { List } from 'react-native-paper';
+import { List, Text } from 'react-native-paper';
 
 const ClockInOutListItem = ({ title, description, }) => {
     return <List.Item
-        title={title}
+        style={{borderBottomWidth: 1, borderBottomColor: '#FFF'}}
+        color="#FFF"
+        title={props => <Text {...props}>{title}</Text>}
         description={description}
         left={props => <List.Icon {...props} icon="clock" />}
     />

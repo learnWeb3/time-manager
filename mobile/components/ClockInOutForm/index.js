@@ -1,17 +1,15 @@
 import * as React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Avatar, Button, Text } from 'react-native-paper';
-import { useSelector } from 'react-redux';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
+import { useSelector, useDispatch } from 'react-redux';
 import { createClock, getUserStatus } from '../../http/api';
 import { useAlert } from '../../hooks/alert';
-import Logo from '../Logo/index';
 import { ApplicationDate } from '../../date/index';
-
-const toAbbreviateIconLabel = (string = "") => string.slice(0, 2).toUpperCase()
+import { addNewCurrentUserClock } from '../../stores/reducers/currentUserClocksReducer';
 
 const CLockInOutForm = () => {
 
-
+    const dispatch = useDispatch();
     const [timeIntervalRef, setTimeIntervalRef] = React.useState(null)
     const { alert, setAlert, component: Snackbar } = useAlert()
     const currentUser = useSelector((state) => state.currentUser.value)
@@ -63,7 +61,14 @@ const CLockInOutForm = () => {
         let message = "";
         let severity = "error"
         try {
-            const { data } = await createClock(currentUser.token, currentUser.user.id)
+            const { data } = await createClock(currentUser.token, currentUser.user.id, {
+                clock: {
+                    time: Math.floor(
+                        Date.now() / 1000
+                    )
+                }
+            })
+            dispatch(addNewCurrentUserClock(data))
             setStatus(data)
             message = data.status ? "Arrival registered with success" : "Departure registered with success";
             severity = "success";
@@ -79,50 +84,51 @@ const CLockInOutForm = () => {
     }
 
     return (
-        <>
+
+        <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-                <View style={styles.headerContainer}>
-                    <Text style={{ fontWeight: 900 }} variant="headlineMedium">Welcome !</Text>
-                </View>
-                <View style={styles.avatarContainer}>
-                    <Avatar.Text style={{ marginBottom: 16 }} size={160} label={
-                        toAbbreviateIconLabel(currentUser ? currentUser.user.email : "")
-                    } />
-                    <Text style={{ fontWeight: 900 }} variant="titleMedium">{currentUser.user.username}</Text>
-                </View>
 
-                {elapsedTimeSinceArrival && <View style={styles.elapsedTimeContainer}>
-                    <Text variant="headlineMedium">
-                        {elapsedTimeSinceArrival.hours}:
-                        {elapsedTimeSinceArrival.minutes}:
-                        {elapsedTimeSinceArrival.seconds}
+                <Text variant="bodyMedium" style={{ marginBottom: 16, marginTop: 16 }}>Press to clock in/out</Text>
+
+                <Button buttonColor={status && status.status || !status ? "#e91e63" : "#5393ff"} mode="contained" onPress={handleSubmit} style={styles.clockInOutButton}>
+                    <Text variant="titleSmall" style={{ color: "#FFF" }}>
+                        {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "Just arrived !"}
                     </Text>
-                </View>}
+                </Button>
 
-                {status && <Button style={{ marginBottom: 24 }} buttonColor='green' icon="clock" mode="contained" onPress={handleSubmit}>
-                    {!status.status ? "Just arrived !" : "Going back home !"}
-                </Button>}
+                <Snackbar onClose={handleCloseAlert} toggled={alert.toggled} message={alert.message} severity={alert.severity} />
             </View>
-            <Snackbar onClose={handleCloseAlert} toggled={alert.toggled} message={alert.message} severity={alert.severity} />
-        </>
+        </ScrollView>
+
     );
 };
 
 const styles = StyleSheet.create({
-    headerContainer: {
+    scrollView: {
+        height: "100%",
+        display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 24
+    },
+    clockInOutButton: {
+        height: 180,
+        width: 180,
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
     },
     container: {
         width: "100%",
-        position: "relative"
-    },
-    avatarContainer: {
-        width: "100%",
+        height: "100%",
+        position: "relative",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 24
+        flex: 1,
     },
     elapsedTimeContainer: {
         width: "100%",

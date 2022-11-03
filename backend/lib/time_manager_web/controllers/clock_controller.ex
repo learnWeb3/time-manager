@@ -79,7 +79,7 @@ defmodule TimeManagerWeb.ClockController do
   def create(conn, %{"userId" => userId, "clock" => clock_params}) do
     try do
 
-      #Application.owner_manager_or_admin!(conn.current_user, userId)
+      Application.owner_manager_or_admin!(conn.current_user, userId)
       clock = Application.create_clock(userId, clock_params)
 
       conn

@@ -95,129 +95,234 @@ defmodule TimeManager.Application do
   end
 
   def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
-    # add a tuple {unix_datetime, userId} if user is still working (has not left yet)
-    if Kernel.length(departure_sums) < Kernel.length(arrival_sums) do
-      {_arrival_sum, userId} = List.first(arrival_sums)
-      # slow - check for impact to prepend instead of append as ++ has a 0(n) complexity
-      unix_datetime = get_unix_current_time()
-      departure_sums = departure_sums ++ [{unix_datetime, userId, 0}]
+    Enum.with_index(departure_sums, fn departure_sum, index ->
+      {departure_sum, userId, periodicity} = departure_sum
+      {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
 
-      Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId, periodicity} = departure_sum
-        {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
-
-        %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
-      end)
-    else
-      Enum.with_index(departure_sums, fn departure_sum, index ->
-        {departure_sum, userId, periodicity} = departure_sum
-        {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
-
-        %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
-      end)
-    end
+      %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
+    end)
   end
 
-  def build_presence_query(%{
-        "userId" => userId,
-        "startDatetime" => startDatetime,
-        "endDatetime" => endDatetime,
-        "status" => status,
-        "periodicity" => periodicity
-      }) do
-    if is_nil(userId) do
-      if is_nil(periodicity) do
-        query =
-          from(clock in Clock,
-            select: {
-              sum(clock.time),
-              clock.user_id,
-              0
-            },
-            where:
-              clock.status == ^status and
-                clock.time >= ^startDatetime and
-                clock.time <= ^endDatetime,
-            group_by: [
-              clock.user_id
-            ]
-          )
-
-        Repo.all(query)
+  def build_presence_query(
+        %{
+          "userId" => userId,
+          "startDatetime" => startDatetime,
+          "endDatetime" => endDatetime,
+          "status" => status,
+          "periodicity" => periodicity
+        },
+        current_user_status \\ nil
+      ) do
+    current_user_status_id =
+      if is_nil(current_user_status) do
+        Map.get(current_user_status, "id", nil)
       else
-        query = """
-        SELECT
-        SUM(clocks.time),
-        clocks.user_id,
-        TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
-        FROM clocks
-        WHERE clocks.status = $2
-        AND clocks.time >= $3
-        AND clocks.time <= $4
-        GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
-        """
+        nil
+      end
 
-        params = [periodicity, status, startDatetime, endDatetime]
+    if is_nil(current_user_status_id) do
+      if is_nil(userId) do
+        if is_nil(periodicity) do
+          query =
+            from(clock in Clock,
+              select: {
+                sum(clock.time),
+                clock.user_id,
+                0
+              },
+              where:
+                clock.status == ^status and
+                  clock.time >= ^startDatetime and
+                  clock.time <= ^endDatetime,
+              group_by: [
+                clock.user_id
+              ]
+            )
 
-        {:ok, result} =
-          Repo.query(
-            query,
-            params
-          )
+          Repo.all(query)
+        else
+          query = """
+          SELECT
+          SUM(clocks.time),
+          clocks.user_id,
+          TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
+          FROM clocks
+          WHERE clocks.status = $2
+          AND clocks.time >= $3
+          AND clocks.time <= $4
+          GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          """
 
-        Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+          params = [periodicity, status, startDatetime, endDatetime]
+
+          {:ok, result} =
+            Repo.query(
+              query,
+              params
+            )
+
+          Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        end
+      else
+        if is_nil(periodicity) do
+          query =
+            from(clock in Clock,
+              select: {
+                sum(clock.time),
+                clock.user_id,
+                0
+              },
+              where:
+                clock.user_id ==
+                  ^userId and
+                  clock.status == ^status and
+                  clock.time >= ^startDatetime and
+                  clock.time <= ^endDatetime,
+              group_by: [
+                clock.user_id
+              ]
+            )
+
+          Repo.all(query)
+        else
+          query = """
+          SELECT
+          SUM(clocks.time),
+          clocks.user_id,
+          TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
+          FROM clocks
+          WHERE clocks.user_id = $2::integer
+          AND clocks.status = $3
+          AND clocks.time >= $4
+          AND clocks.time <= $5
+          GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          """
+
+          {userId, _} = Integer.parse(userId)
+          params = [periodicity, userId, status, startDatetime, endDatetime]
+
+          {:ok, result} =
+            Repo.query(
+              query,
+              params
+            )
+
+          Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        end
       end
     else
-      if is_nil(periodicity) do
-        query =
-          from(clock in Clock,
-            select: {
-              sum(clock.time),
-              clock.user_id,
-              0
-            },
-            where:
-              clock.user_id ==
-                ^userId and
-                clock.status == ^status and
-                clock.time >= ^startDatetime and
-                clock.time <= ^endDatetime,
-            group_by: [
-              clock.user_id
-            ]
-          )
+      if is_nil(userId) do
+        if is_nil(periodicity) do
+          query =
+            from(clock in Clock,
+              select: {
+                sum(clock.time),
+                clock.user_id,
+                0
+              },
+              where:
+                clock.id != ^current_user_status_id and
+                  clock.status == ^status and
+                  clock.time >= ^startDatetime and
+                  clock.time <= ^endDatetime,
+              group_by: [
+                clock.user_id
+              ]
+            )
 
-        Repo.all(query)
+          Repo.all(query)
+        else
+          query = """
+          SELECT
+          SUM(clocks.time),
+          clocks.user_id,
+          TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
+          FROM clocks
+          WHERE clocks.status = $2
+          AND clocks.time >= $3
+          AND clocks.time <= $4
+          AND clocks.id != $5
+          GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          """
+
+          params = [periodicity, status, startDatetime, endDatetime, current_user_status_id]
+
+          {:ok, result} =
+            Repo.query(
+              query,
+              params
+            )
+
+          Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        end
       else
-        query = """
-        SELECT
-        SUM(clocks.time),
-        clocks.user_id,
-        TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
-        FROM clocks
-        WHERE clocks.user_id = $2::integer
-        AND clocks.status = $3
-        AND clocks.time >= $4
-        AND clocks.time <= $5
-        GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
-        """
+        if is_nil(periodicity) do
+          query =
+            from(clock in Clock,
+              select: {
+                sum(clock.time),
+                clock.user_id,
+                0
+              },
+              where:
+                clock.user_id ==
+                  ^userId and
+                  clock.id != ^current_user_status_id and
+                  clock.status == ^status and
+                  clock.time >= ^startDatetime and
+                  clock.time <= ^endDatetime,
+              group_by: [
+                clock.user_id
+              ]
+            )
 
-        {userId, _} = Integer.parse(userId)
-        params = [periodicity, userId, status, startDatetime, endDatetime]
+          Repo.all(query)
+        else
+          query = """
+          SELECT
+          SUM(clocks.time),
+          clocks.user_id,
+          TO_CHAR(TO_TIMESTAMP(clocks.time), $1) as periodicity
+          FROM clocks
+          WHERE clocks.user_id = $2::integer
+          AND clocks.status = $3
+          AND clocks.time >= $4
+          AND clocks.time <= $5
+          AND clocks.id != $6
+          GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          """
 
-        {:ok, result} =
-          Repo.query(
-            query,
-            params
-          )
+          {userId, _} = Integer.parse(userId)
 
-        Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+          params = [
+            periodicity,
+            userId,
+            status,
+            startDatetime,
+            endDatetime,
+            current_user_status_id
+          ]
+
+          {:ok, result} =
+            Repo.query(
+              query,
+              params
+            )
+
+          Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+        end
       end
     end
   end
 
   def get_presence(params) do
     userId = Map.get(params, "userId", nil)
+
+    current_user_status =
+      get_user_status(%{
+        "userId" => userId
+      })
+
     unix_datetime = get_unix_current_time()
     year_in_seconds = 365 * 24 * 60 * 60
 
@@ -257,7 +362,7 @@ defmodule TimeManager.Application do
       "periodicity" => current_periodicity
     }
 
-    departure_sums = build_presence_query(departure_query_params)
+    departure_sums = build_presence_query(departure_query_params, current_user_status)
 
     arrival_query_params = %{
       "userId" => userId,
@@ -267,7 +372,7 @@ defmodule TimeManager.Application do
       "periodicity" => current_periodicity
     }
 
-    arrival_sums = build_presence_query(arrival_query_params)
+    arrival_sums = build_presence_query(arrival_query_params, current_user_status)
 
     calculate_presence_duration_from_sums(departure_sums, arrival_sums)
   end
@@ -427,6 +532,30 @@ defmodule TimeManager.Application do
 
   # =========  CLOCKS ============
 
+  def get_clocked_in_users do
+    query = """
+    SELECT
+    clocks.user_id,
+    clocks.status,
+    clocks.time
+    FROM clocks
+    WHERE clocks.time
+    IN
+    (SELECT MAX(clocks.time) FROM clocks GROUP BY clocks.user_id)
+    AND clocks.status = TRUE
+    """
+
+    {:ok, result} =
+      Repo.query(
+        query,
+        []
+      )
+
+    Enum.map(result.rows, fn [user_id, status, time] ->
+      %{"status" => status, "user_id" => user_id, "time" => time}
+    end)
+  end
+
   def list_clocks do
     Repo.all(Clock)
   end
@@ -443,7 +572,7 @@ defmodule TimeManager.Application do
       query =
         from(clock in Clock,
           where: clock.user_id == ^userId,
-          order_by: [desc: clock.inserted_at]
+          order_by: [desc: clock.inserted_at, desc: clock.id]
         )
 
       Repo.all(query)
@@ -454,7 +583,7 @@ defmodule TimeManager.Application do
     query =
       from(clock in Clock,
         where: clock.user_id == ^userId,
-        order_by: [desc: clock.inserted_at],
+        order_by: [desc: clock.inserted_at, desc: clock.id],
         limit: ^limit
       )
 

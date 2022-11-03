@@ -14,6 +14,7 @@ RUN npm run build
 FROM elixir:alpine as time_manager_back
 
 RUN apk add --no-cache build-base make
+RUN apk add --update apk-cron && rm -rf /var/cache/apk/*
 
 COPY /backend/ /backend
 
@@ -31,5 +32,11 @@ RUN mix compile
 # Compile assets
 RUN MIX_ENV=prod DATABASE_URL=${DATABASE_URL} SECRET_KEY_BASE=${SECRET_KEY_BASE} mix assets.deploy
 
+# copy cron tasks
+COPY ./cron_tasks /cron_tasks
+COPY ./entry.sh /entry.sh
+RUN chmod 755 /cron_tasks/daily_clock_manager.sh /entry.sh
+RUN touch /var/log/script.log
+RUN /usr/bin/crontab /cron_tasks/crontab.txt
 # Finally run the server
-CMD MIX_ENV=prod mix ecto.migrate && MIX_ENV=prod && PORT=4000 MIX_ENV=prod mix phx.server
+ENTRYPOINT ["/entry.sh"]

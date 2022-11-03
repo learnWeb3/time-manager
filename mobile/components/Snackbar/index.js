@@ -23,15 +23,19 @@ const Snackbar = ({
 
 const styles = StyleSheet.create({
     error: {
+        zIndex: 100,
         backgroundColor: 'red',
     },
     info: {
+        zIndex: 100,
         backgroundColor: 'blue'
     },
     warning: {
+        zIndex: 100,
         backgroundColor: 'yellow'
     },
     success: {
+        zIndex: 100,
         backgroundColor: 'green'
     }
 })
