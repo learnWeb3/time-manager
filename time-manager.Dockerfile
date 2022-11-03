@@ -33,8 +33,8 @@ RUN mix compile
 RUN MIX_ENV=prod DATABASE_URL=${DATABASE_URL} SECRET_KEY_BASE=${SECRET_KEY_BASE} mix assets.deploy
 
 # copy cron tasks
-COPY ./cron_tasks /cron_tasks
-COPY ./entry.sh /entry.sh
+COPY /cron_tasks /cron_tasks
+COPY /entry.sh /entry.sh
 RUN chmod 755 /cron_tasks/daily_clock_manager.sh /entry.sh
 RUN touch /var/log/script.log
 RUN /usr/bin/crontab /cron_tasks/crontab.txt

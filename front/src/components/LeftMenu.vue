@@ -1,5 +1,5 @@
 <template>
-  <div class="row col-12 q-mt-sm">
+  <div class="row col-12 q-mt-sm" style="position: absolute">
     <div :class="store.step === 3 ? 'col-12 flex justify-center q-mt-xl' : 'col-12 flex justify-center'">
       <q-avatar size="125px">
         <img :src="this.store.avatar" />
@@ -14,7 +14,7 @@
     <div class="col-12 flex q-mt-md justify-center">
       <q-btn :outline="store.menu === 'Dashboard' ? false : true" rounded unelevated size="md" :style="store.menu === 'Dashboard' ? 'background-color: #1282A2; color: white' : 'color: #1282A2'" label="Dashboard" @click="store.menu = 'Dashboard', store.stepUser = 2"/>
     </div>
-    <div class="col-12 flex q-mt-md justify-center">
+    <div class="col-12 flex q-mt-md justify-center" style="position: relative; bottom: 0;">
       <q-btn :outline="store.menu === 'Dashboard' ? false : true" rounded unelevated size="md" :style="store.menu === 'Dashboard' ? 'background-color: #1282A2; color: white' : 'color: #1282A2'" label="Dashboard" @click="store.menu = 'Dashboard', store.stepUser = 2"/>
     </div>
   </div>
