@@ -38,5 +38,5 @@ COPY ./entry.sh /entry.sh
 RUN chmod 755 /cron_tasks/daily_clock_manager.sh /entry.sh
 RUN touch /var/log/script.log
 RUN /usr/bin/crontab /cron_tasks/crontab.txt
-# Finally run the server
+
 ENTRYPOINT ["/entry.sh"]
