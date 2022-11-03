@@ -13,7 +13,7 @@ defmodule CronTask do
         "time" => Application.get_unix_current_time()
       })
 
-      Process.sleep(1000)
+      Process.sleep(90000)
 
       # clock in the user back as it may not have yet finished working
       Application.create_clock(user_id, %{
