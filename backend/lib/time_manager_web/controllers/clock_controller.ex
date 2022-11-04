@@ -61,6 +61,14 @@ defmodule TimeManagerWeb.ClockController do
 
   def presence(conn, params) do
     try do
+      user_id = Map.get(params, "userId", nil)
+
+      if is_nil(user_id) do
+        Application.manager_or_admin!(conn.current_user)
+      else
+        Application.owner_manager_or_admin!(conn.current_user, user_id)
+      end
+
       presences = Application.get_presence(params)
 
       conn
@@ -78,7 +86,6 @@ defmodule TimeManagerWeb.ClockController do
 
   def create(conn, %{"userId" => userId, "clock" => clock_params}) do
     try do
-
       Application.owner_manager_or_admin!(conn.current_user, userId)
       clock = Application.create_clock(userId, clock_params)
 
@@ -97,6 +104,12 @@ defmodule TimeManagerWeb.ClockController do
 
   def user_clocks(conn, params) do
     try do
+      user_id = Map.get(params, "userId", nil)
+
+      if not is_nil(user_id) do
+        Application.owner_manager_or_admin!(conn.current_user, user_id)
+      end
+
       user_clocks = Application.get_user_clocks(params)
       render(conn, "index.json", clocks: user_clocks)
     rescue

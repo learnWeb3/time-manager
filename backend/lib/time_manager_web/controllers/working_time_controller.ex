@@ -6,11 +6,11 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:index, :create, :show, :delete])
+  plug(TimeManager.Plugs.Auth, "")
 
   # check user permission using token
   roles = Role.get()
-  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]] when action in [:index])
 
   # check authorized parameters
 
