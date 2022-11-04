@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
 name: Time_Manager_Container_Workflow
 
 jobs:
