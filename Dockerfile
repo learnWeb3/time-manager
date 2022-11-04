@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:alpine as time_manager_front
+FROM node:alpine as time_manager_front
 
 WORKDIR /front
 
@@ -11,7 +11,7 @@ COPY /front/ ./
 
 RUN npm run build
 
-FROM --platform=linux/amd64 elixir:alpine as time_manager_back
+FROM elixir:alpine as time_manager_back
 
 RUN apk add --no-cache build-base make
 RUN apk add --update apk-cron && rm -rf /var/cache/apk/*
@@ -33,10 +33,9 @@ RUN mix compile
 RUN MIX_ENV=prod DATABASE_URL=${DATABASE_URL} SECRET_KEY_BASE=${SECRET_KEY_BASE} mix assets.deploy
 
 # copy cron tasks
-COPY /cron_tasks /cron_tasks/
-COPY /entry.sh /entry.sh
-RUN chmod 755 /cron_tasks/daily_clock_manager.sh /entry.sh
+COPY /cron_tasks /cron_tasks
+RUN chmod 755 /cron_tasks/daily_clock_manager.sh 
 RUN touch /var/log/script.log
 RUN /usr/bin/crontab /cron_tasks/crontab.txt
 
-ENTRYPOINT ["/entry.sh"]
+CMD /usr/sbin/crond -f -l 8 & MIX_ENV=prod mix ecto.migrate & MIX_ENV=prod mix run ./priv/repo/seeds.exs & MIX_ENV=prod PORT=4000 mix phx.server
