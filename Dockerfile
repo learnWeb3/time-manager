@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 node:alpine as time_manager_front
 
 WORKDIR /front
 
-COPY /front/package*.json .
+COPY /front/package*.json ./
 
 RUN npm i -g @quasar/cli
 RUN npm i --no-audit --loglevel verbose
