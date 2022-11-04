@@ -7,4 +7,4 @@ services:
       - .env.production
     domainname: "timemanagerepitechstudents"
     ports:
-      - 4000:4000
+      - ${CONTAINER_PORT}:${CONTAINER_PORT}
