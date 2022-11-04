@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
 name: Time_Manager_Container_Workflow
 
 jobs:
@@ -23,23 +26,15 @@ jobs:
       - run: |
           docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/time-manager--backend:latest
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/time-manager--backend:latest
-  restart-backend-image:
-    runs-on: ubuntu-latest
-    steps:
-      # checkout the repo
-      - name: "Checkout GitHub Action"
-        uses: actions/checkout@main
-
-      - name: "Login via Azure CLI"
-        uses: azure/login@v1
+      - name: 'Deploy to Azure Container Instances'
+        uses: 'azure/aci-deploy@v1'
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: "Restart image"
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-      - run: |
-          docker compose -f ./docker-compose.production.yml down && docker compose -f ./docker-compose.production.yml up
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: 'timemanagerepitechstudent'
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/time-manager--backend:latest
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          environment-variables: SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} DATABASE_URL=${{ secrets.DATABASE_URL }}  CONTAINER_PORT=${{ secrets.CONTAINER_PORT }}
+          name: time-manager--backend
+          location: 'francecentral'
