@@ -28,11 +28,17 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6"), do: [:inet6], else: []
 
+  ssl_enabled =
+    if System.get_env("SSL_ENABLED") == "1" do
+      true
+    else
+      false
+    end
+
   config :time_manager, TimeManager.Repo,
-    # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    ssl: true,
+    ssl: ssl_enabled,
     size: 20,
     socket_options: maybe_ipv6
 
