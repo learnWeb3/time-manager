@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DashboardScreen from '../../screens/DashboardScreen/index';
 import HistoryScreen from '../../screens/HistoryScreen';
+import ProfileScreen from '../../screens/ProfileScreen/index';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,6 +35,13 @@ export default function AuthenticatedScreenRouter() {
                         ),
                     }} >
                         {(props) => <DashboardScreen {...props} />}
+                    </Tab.Screen>
+                    <Tab.Screen name={routes.profile.name} options={{
+                        title: routes.profile.title, tabBarIcon: ({ color, size }) => (
+                            <MaterialCommunityIcons name="account" color={color} size={size} />
+                        ),
+                    }} >
+                        {(props) => <ProfileScreen {...props} />}
                     </Tab.Screen>
                 </Tab.Navigator>
             </NavigationContainer>

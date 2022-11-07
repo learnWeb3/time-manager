@@ -29,6 +29,22 @@ export const login = async (data = { email: "", password: "" }) => {
     return await httpApi.post('/sessions/login', data).then((response) => response.data)
 }
 
+export const getProfileInformations = async (token, userId) => {
+    return mergeAuthHeaders(httpApi, token).get(`/users/${userId}`)
+        .then((response) => response.data)
+}
+
+export const updateProfileInformations = async (token, userId, data = {
+    email: "",
+    jobtitle: "",
+    username: ""
+}) => {
+
+    return await mergeAuthHeaders(httpApi, token).put(`/users/${userId}`, {
+        user: data
+    }).then((response) => response.data)
+}
+
 export const getUserStatus = (token, userId) => mergeAuthHeaders(httpApi, token)
     .get(`/status/${userId}`,)
     .then((response) => response.data)

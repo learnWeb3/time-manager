@@ -2,12 +2,12 @@ import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
 
-const InputGroup = ({ isError, value, errors, handleInput, secureTextEntry = false }) => {
+const InputGroup = ({label, isError, value, errors, handleInput, secureTextEntry = false }) => {
 
     return <View style={styles.container}>
         <TextInput
             error={isError}
-            label="Email"
+            label={label}
             value={value}
             secureTextEntry={secureTextEntry}
             onChangeText={email => handleInput(email)}
