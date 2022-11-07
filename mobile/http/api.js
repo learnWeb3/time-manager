@@ -34,6 +34,28 @@ export const getProfileInformations = async (token, userId) => {
         .then((response) => response.data)
 }
 
+export const getSchedules = async (token) => {
+    return mergeAuthHeaders(httpApi, token).get(`/schedules`)
+        .then((response) => response.data)
+}
+
+export const getWorkingTimes = async (token, userId) => {
+    return mergeAuthHeaders(httpApi, token).get(`/workingtimes/${userId}`)
+        .then((response) => response.data)
+}
+
+export const createWorkingTime = (token, userId, data = {
+    "schedule_id": null
+}) => mergeAuthHeaders(httpApi, token)
+    .post(`/workingtimes/${userId}`, {
+        working_time: data
+    })
+    .then((response) => response.data)
+
+export const deleteWorkingTime = (token, workingtimeId) => mergeAuthHeaders(httpApi, token)
+    .delete(`/workingtimes/${workingtimeId}`)
+    .then((response) => response.data)
+
 export const updateProfileInformations = async (token, userId, data = {
     email: "",
     jobtitle: "",

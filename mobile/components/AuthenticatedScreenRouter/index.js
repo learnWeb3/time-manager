@@ -7,12 +7,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import DashboardScreen from '../../screens/DashboardScreen/index';
 import HistoryScreen from '../../screens/HistoryScreen';
 import ProfileScreen from '../../screens/ProfileScreen/index';
+import TimetableScreen from '../../screens/TimetableScreen/index';
+import DataLoader from '../DataLoader/index';
 
 const Tab = createBottomTabNavigator();
 
 export default function AuthenticatedScreenRouter() {
     return (
-        <>
+        <DataLoader>
             <NavigationContainer>
                 <Tab.Navigator>
                     <Tab.Screen name={routes.clockinout.name} options={{
@@ -43,8 +45,15 @@ export default function AuthenticatedScreenRouter() {
                     }} >
                         {(props) => <ProfileScreen {...props} />}
                     </Tab.Screen>
+                    <Tab.Screen name={routes.timetable.name} options={{
+                        title: routes.timetable.title, tabBarIcon: ({ color, size }) => (
+                            <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
+                        ),
+                    }} >
+                        {(props) => <TimetableScreen {...props} />}
+                    </Tab.Screen>
                 </Tab.Navigator>
             </NavigationContainer>
-        </>
+        </DataLoader>
     );
 }

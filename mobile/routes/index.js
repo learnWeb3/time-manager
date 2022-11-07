@@ -14,5 +14,9 @@ export const routes = {
     profile: {
         name: "profile",
         title: "Profile"
+    },
+    timetable: {
+        name: "timetable",
+        title: 'Timetable'
     }
 }
