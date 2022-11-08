@@ -96,18 +96,18 @@ const CLockInOutForm = () => {
     return (
         <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-                <View style={{flex:2}}>
-                    <Text variant="bodyMedium" style={{marginTop:"100%",fontSize:40, color:"#001f54", fontFamily:"Poppins" }}> {!elapsedTimeSinceArrival ?  "Clock in" : " Clock Out" }</Text>
+                <View style={{flex:2,alignItems: "center",justifyContent: "center"}}>
+                    <Text variant="bodyMedium" style={{marginTop:"50%",fontSize:30, color:"#001f54", fontFamily:"Poppins" }}> {!elapsedTimeSinceArrival ?  "Clock in" : " Clock Out" }</Text>
                 </View>
                 <View  style={{flex:2,alignItems: 'center', justifyContent: 'center'}}>
                     <Button  onPress={handleSubmit}>
-                        {!elapsedTimeSinceArrival ?<Image style={{height:300 ,width:300, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
-                        :<Image  style={{height: 250 ,width:250, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
+                        {!elapsedTimeSinceArrival ?<Image style={{height:150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
+                        :<Image  style={{height: 150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
                     </Button> 
                 </View>
                 <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={{color:"#001f54", fontSize:40, fontFamily:"Poppins"}}>Presence time </Text>
-                    <Text variant="titleSmall" style={{marginTop:30,fontSize:40, fontFamily:"Orbitron"}}>
+                    <Text style={{color:"#001f54", fontSize:30, fontFamily:"Poppins"}}>Presence time </Text>
+                    <Text variant="titleSmall" style={{marginTop:30,fontSize:30, fontFamily:"Orbitron"}}>
                         {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "00:00:00"}
                     </Text>
                 </View>

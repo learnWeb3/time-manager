@@ -31,16 +31,16 @@ const Dashboard = () => {
         <View ref={viewContainerRef} style={styles.container}>
 
             <View style={styles.filterContainer}>
-                <Button textColor={selectedPeriodicity === "day" ? "#FFF" : "#001f54"} style={{ width:"24%",marginRight: 8, marginBottom: 8, borderRadius:0,height:40 }} mode={selectedPeriodicity === "day" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("day")}>
+                <Button textColor={selectedPeriodicity === "day" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8, borderRadius:0, fontSize:10 }} mode={selectedPeriodicity === "day" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("day")}>
                     Day
                 </Button>
-                <Button textColor={selectedPeriodicity === "week" ? "#FFF" : "#001f54"} style={{ width:"24%",marginRight: 8, marginBottom: 8,borderRadius:0 }} mode={selectedPeriodicity === "week" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("week")}>
+                <Button textColor={selectedPeriodicity === "week" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8,borderRadius:0,fontSize:20}} mode={selectedPeriodicity === "week" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("week")}>
                     Week
                 </Button>
-                <Button textColor={selectedPeriodicity === "month" ? "#FFF" : "#001f54"} style={{ width:"24%",marginRight: 8, marginBottom: 8,borderRadius:0  }} mode={selectedPeriodicity === "month" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("month")}>
+                <Button textColor={selectedPeriodicity === "month" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8,borderRadius:0, fontSize :20 }} mode={selectedPeriodicity === "month" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("month")}>
                     Month
                 </Button>
-                <Button textColor={selectedPeriodicity === "year" ? "#FFF" : "#001f54"} style={{width:"22%",marginRight: 8, marginBottom: 8, borderRadius:0  }} mode={selectedPeriodicity === "year" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("year")}>
+                <Button textColor={selectedPeriodicity === "year" ? "#FFF" : "#001f54"} style={{marginRight: 8, marginBottom: 8, borderRadius:0,fontSize:20  }} mode={selectedPeriodicity === "year" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("year")}>
                     Year
                 </Button>
             </View>
@@ -66,7 +66,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: -2, height: 4},
         shadowOpacity: 0.2,
         shadowRadius: 3,
-        height:40
+        height:40,
+        justifyContent:"space-evenly"
     },
     container: {
         width: "100%"

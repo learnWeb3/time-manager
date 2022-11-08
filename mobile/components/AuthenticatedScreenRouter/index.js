@@ -18,7 +18,7 @@ export default function AuthenticatedScreenRouter() {
 				activeTintColor: "#001f54",
 				inactiveTintColor: "#8E8E8F",
 				labelStyle: {
-					fontSize: 15,
+					fontSize: 10,
 				},
 			}} >
                     <Tab.Screen name={routes.clockinout.name} options={{
