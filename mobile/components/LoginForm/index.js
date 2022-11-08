@@ -123,32 +123,27 @@ const LoginForm = () => {
 
     return (
         <>
-            <View style={styles.container}>
-                <Text style={styles.header} variant="headlineMedium">Sign in</Text>
-
+            <View style={{flex:2}}>
                 <InputGroup
                     isError={formData.email.isError}
                     errors={formData.email.errors}
                     value={formData.email.value}
-                    handleInput={email => handleEmail(email)}
-                />
-
-
+                    label="Email"
+                    handleInput={email => handleEmail(email)}/>
                 <InputGroup
                     isError={formData.password.isError}
                     errors={formData.password.errors}
                     value={formData.password.value}
+                    label="Password"
                     handleInput={password => handlePassword(password)}
-                    secureTextEntry={true}
-                />
-
-                <Button disabled={formData.email.isError || formData.password.isError} mode="contained" onPress={handleSubmit}>
-                    ok
-                </Button>
-
+                    secureTextEntry={true}/>
             </View>
-
+            <View style={{flex:2}}>
+                <Button style={{borderRadius:4}} textColor={"white"} buttonColor={"#001f54"}  mode="contained" onPress={handleSubmit}>
+                    Connect
+                </Button>
             <Snackbar onClose={handleCloseAlert} toggled={alert.toggled} message={alert.message} severity={alert.severity} />
+            </View>
 
         </>
     );

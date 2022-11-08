@@ -6,6 +6,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DashboardScreen from '../../screens/DashboardScreen/index';
 import HistoryScreen from '../../screens/HistoryScreen';
+import { Button, Text } from 'react-native-paper';
+
 
 const Tab = createBottomTabNavigator();
 

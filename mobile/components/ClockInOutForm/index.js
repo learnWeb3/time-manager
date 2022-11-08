@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React , {useEffect,useState} from 'react';
+import { ScrollView, StyleSheet, View, Image, Dimensions } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { createClock, getUserStatus } from '../../http/api';
@@ -13,15 +13,25 @@ const CLockInOutForm = () => {
     const [timeIntervalRef, setTimeIntervalRef] = React.useState(null)
     const { alert, setAlert, component: Snackbar } = useAlert()
     const currentUser = useSelector((state) => state.currentUser.value)
-
     const [status, setStatus] = React.useState(null)
-    const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null)
+    const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null);
+    const [isLandscape, setIsLandscape] = React.useState(false);
 
     React.useEffect(() => {
         if (currentUser) {
             getUserStatus(currentUser.token, currentUser.user.id).then((status) => setStatus(status.data ? status.data : "no data"))
         }
     }, [currentUser])
+
+    // useEffect(()=>{
+    //     console.log("test")
+    //     const dim = Dimensions.get('screen');
+    //     if (dim.width >= dim.height){
+    //         setIsLandscape(true);
+    //     }else{
+    //         setIsLandscape(false);
+    //     }
+    //     })
 
 
     React.useEffect(() => {
@@ -56,7 +66,7 @@ const CLockInOutForm = () => {
             severity: "error"
         })
     }
-
+ 
     const handleSubmit = async () => {
         let message = "";
         let severity = "error"
@@ -87,14 +97,23 @@ const CLockInOutForm = () => {
 
         <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-
-                <Text variant="bodyMedium" style={{ marginBottom: 16, marginTop: 16 }}>Press to clock in/out</Text>
-
-                <Button buttonColor={status && status.status || !status ? "#e91e63" : "#5393ff"} mode="contained" onPress={handleSubmit} style={styles.clockInOutButton}>
-                    <Text variant="titleSmall" style={{ color: "#FFF" }}>
-                        {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "Just arrived !"}
+                <View style={{flex:2}}>
+                    <Text variant="bodyMedium" style={{marginTop:"100%",fontSize:40, color:"#001f54", fontFamily:"Poppins" }}> {!elapsedTimeSinceArrival ?  "Clock in" : " Clock Out" }</Text>
+                </View>
+                <View  style={{flex:2,alignItems: 'center', justifyContent: 'center'}}>
+                    <Button  onPress={handleSubmit}>
+                        {!elapsedTimeSinceArrival ?<Image style={{height:250 ,width:250, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
+                        :<Image  style={{height: 250 ,width:250, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
+                    </Button> 
+                </View>
+                
+                <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={{color:"#001f54", fontSize:40, fontFamily:"Poppins"}}>Presence time </Text>
+                    <Text variant="titleSmall" style={{marginTop:30,fontSize:40, fontFamily:"Orbitron"}}>
+                        {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "00:00:00"}
                     </Text>
-                </Button>
+                </View>
+
 
                 <Snackbar onClose={handleCloseAlert} toggled={alert.toggled} message={alert.message} severity={alert.severity} />
             </View>
