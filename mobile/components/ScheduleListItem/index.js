@@ -38,7 +38,9 @@ const ScheduleListItem = ({ schedule, currentUser }) => {
             6: 'Sunday'
         }
 
-        return `${numberToDay[schedule.weekday]} from ${ApplicationDate.addTrailingZero(schedule.starthour)}:${ApplicationDate.addTrailingZero(schedule.startminute)} to ${ApplicationDate.addTrailingZero(schedule.endhour)}:${ApplicationDate.addTrailingZero(schedule.endminute)}`
+        const shiftDuration = (schedule.endhour + (schedule.endminute / 60)) - (schedule.starthour + (schedule.startminute / 60))
+
+        return `${numberToDay[schedule.weekday]} from ${ApplicationDate.addTrailingZero(schedule.starthour)}:${ApplicationDate.addTrailingZero(schedule.startminute)} to ${ApplicationDate.addTrailingZero(schedule.endhour)}:${ApplicationDate.addTrailingZero(schedule.endminute)} - ${shiftDuration} hours`
     }
 
     return <List.Item

@@ -104,12 +104,6 @@ defmodule TimeManagerWeb.ClockController do
 
   def user_clocks(conn, params) do
     try do
-      user_id = Map.get(params, "userId", nil)
-
-      if not is_nil(user_id) do
-        Application.owner_manager_or_admin!(conn.current_user, user_id)
-      end
-
       user_clocks = Application.get_user_clocks(params)
       render(conn, "index.json", clocks: user_clocks)
     rescue
