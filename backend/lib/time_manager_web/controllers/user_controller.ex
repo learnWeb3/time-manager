@@ -2,7 +2,6 @@ defmodule TimeManagerWeb.UserController do
   use TimeManagerWeb, :controller
 
   alias TimeManager.Application
-  alias TimeManager.Application.User
   alias TimeManager.Application.Role
 
   action_fallback(TimeManagerWeb.FallbackController)
@@ -10,8 +9,13 @@ defmodule TimeManagerWeb.UserController do
   plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
 
   # check user permission using token
-  # roles = Role.get()
-  # plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]])
+  roles = Role.get()
+
+  plug(
+    TimeManager.Plugs.RoleGuard,
+    [roles["admin"], roles["manager"]]
+    when action in [:create, :delete]
+  )
 
   # check authorized_params
   plug(
@@ -91,6 +95,7 @@ defmodule TimeManagerWeb.UserController do
 
   def show(conn, %{"id" => id}) do
     try do
+      Application.owner_manager_or_admin!(conn.current_user, id)
       user = Application.get_user!(id)
       render(conn, "show.json", user: user)
     rescue
@@ -106,6 +111,7 @@ defmodule TimeManagerWeb.UserController do
   def update(conn, %{"id" => id, "user" => user_params}) do
     try do
       user = Application.get_user!(id)
+      Application.owner_manager_or_admin!(conn.current_user, id)
       {:ok, user} = Application.update_user(user, user_params)
       render(conn, "show.json", user: user)
     rescue
@@ -120,6 +126,7 @@ defmodule TimeManagerWeb.UserController do
 
   def delete(conn, %{"id" => id}) do
     try do
+      Application.owner_manager_or_admin!(conn.current_user, id)
       Application.delete_user(id)
       send_resp(conn, :no_content, "")
     rescue

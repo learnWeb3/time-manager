@@ -127,6 +127,7 @@ const LoginForm = () => {
                 <Text style={styles.header} variant="headlineMedium">Sign in</Text>
 
                 <InputGroup
+                    label={"Email"}
                     isError={formData.email.isError}
                     errors={formData.email.errors}
                     value={formData.email.value}
@@ -135,6 +136,7 @@ const LoginForm = () => {
 
 
                 <InputGroup
+                    label={"Password"}
                     isError={formData.password.isError}
                     errors={formData.password.errors}
                     value={formData.password.value}
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
     },
     container: {
         width: "100%",
-        padding:24
+        padding: 24
     },
 });
 

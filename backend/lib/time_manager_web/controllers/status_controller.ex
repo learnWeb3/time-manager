@@ -1,10 +1,17 @@
 defmodule TimeManagerWeb.StatusController do
   use TimeManagerWeb, :controller
   alias TimeManager.Application
+  alias TimeManager.Application.Role
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :user_clocks])
+  # authenticate user
+  plug(TimeManager.Plugs.Auth, "")
+
+  # check user permission using token
+  roles = Role.get()
+
+  plug(TimeManager.Plugs.RoleGuard, [roles["admin"], roles["manager"]] when action in [:index])
 
   plug(
     TimeManager.Plugs.AuthorizeParams,
@@ -41,6 +48,8 @@ defmodule TimeManagerWeb.StatusController do
 
   def show(conn, params) do
     try do
+      user_id = Map.get(params, "userId", nil)
+      Application.owner_manager_or_admin!(conn.current_user, user_id)
       user_status = Application.get_user_status(params)
       render(conn, "show.json", status: user_status)
     rescue

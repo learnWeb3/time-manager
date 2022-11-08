@@ -13,8 +13,8 @@ services:
     container_name: backend
     build:
       context: .
-      dockerfile: time-manager.Dockerfile
+      dockerfile: Dockerfile
     ports:
-      - 4000:4000
+      - ${CONTAINER_PORT}:${CONTAINER_PORT}
     depends_on:
       - postgres

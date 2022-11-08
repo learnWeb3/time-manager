@@ -115,9 +115,9 @@ defmodule TimeManager.Application do
       ) do
     current_user_status_id =
       if is_nil(current_user_status) do
-        Map.get(current_user_status, "id", nil)
-      else
         nil
+      else
+        Map.get(current_user_status, "id", nil)
       end
 
     if is_nil(current_user_status_id) do
@@ -319,9 +319,14 @@ defmodule TimeManager.Application do
     userId = Map.get(params, "userId", nil)
 
     current_user_status =
-      get_user_status(%{
-        "userId" => userId
-      })
+      try do
+        get_user_status(%{
+          "userId" => userId
+        })
+      rescue
+        _e ->
+          nil
+      end
 
     unix_datetime = get_unix_current_time()
     year_in_seconds = 365 * 24 * 60 * 60
@@ -804,6 +809,19 @@ defmodule TimeManager.Application do
   end
 
   # ========== HELPERS ===========
+
+  def manager_or_admin!(%User{} = current_user) do
+    roles = TimeManager.Application.Role.get()
+
+    current_user_id = current_user.id
+    admin_role = roles["admin"]
+    manager_role = roles["manager"]
+    current_user_role = current_user.role
+
+    if current_user_role != manager_role and current_user_role != admin_role do
+      raise RoleMismatchError
+    end
+  end
 
   def owner_manager_or_admin!(%User{} = current_user, userId) do
     roles = TimeManager.Application.Role.get()
