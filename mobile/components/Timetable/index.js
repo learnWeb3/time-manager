@@ -2,10 +2,12 @@ import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { ScrollView, FlatList, StyleSheet } from 'react-native';
 import ScheduleListItem from '../ScheduleListItem/index';
+import { Text } from 'react-native-paper';
+import ScheduledWorkingTimesSum from '../ScheduledWorkingTimesSum';
 
 const Timetable = () => {
 
-    const currentUser = useSelector((state)=>state.currentUser.value)
+    const currentUser = useSelector((state) => state.currentUser.value)
     const schedules = useSelector((state) => state.schedules.value);
     const workingtimes = useSelector((state) => state.workingtimes.value)
     const [formattedSchedules, setFormattedSchedules] = React.useState([])
@@ -30,7 +32,7 @@ const Timetable = () => {
     }, [schedules, workingtimes])
 
     const renderFormattedSchedule = ({ item: schedule }) => {
-        return <ScheduleListItem key={schedule.id} schedule={schedule} currentUser={currentUser}  />
+        return <ScheduleListItem key={schedule.id} schedule={schedule} currentUser={currentUser} />
     }
     return (
         <ScrollView style={styles.schedulesListContainer}>
@@ -39,6 +41,7 @@ const Timetable = () => {
                 renderItem={renderFormattedSchedule}
                 keyExtractor={item => item.id}
             />
+            <ScheduledWorkingTimesSum scheduleWithWorkingTimes={formattedSchedules} />
         </ScrollView>
     )
 }

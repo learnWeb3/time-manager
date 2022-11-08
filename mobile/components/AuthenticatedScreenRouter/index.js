@@ -9,10 +9,13 @@ import HistoryScreen from '../../screens/HistoryScreen';
 import ProfileScreen from '../../screens/ProfileScreen/index';
 import TimetableScreen from '../../screens/TimetableScreen/index';
 import DataLoader from '../DataLoader/index';
+import { useSchedulesWorkingTimesSum } from '../../hooks/schedulesWorkingTimeSum';
 
 const Tab = createBottomTabNavigator();
 
 export default function AuthenticatedScreenRouter() {
+
+    const { sum } = useSchedulesWorkingTimesSum()
     return (
         <DataLoader>
             <NavigationContainer>
@@ -46,7 +49,7 @@ export default function AuthenticatedScreenRouter() {
                         {(props) => <ProfileScreen {...props} />}
                     </Tab.Screen>
                     <Tab.Screen name={routes.timetable.name} options={{
-                        title: routes.timetable.title, tabBarIcon: ({ color, size }) => (
+                        title: `${routes.timetable.title} ${sum}`, tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
                         ),
                     }} >
