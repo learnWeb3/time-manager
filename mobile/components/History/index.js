@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         alignItems: "center",
-        justifyContent: "start",
+        justifyContent: "flex-start",
         display: "flex",
         flexDirection: "row",
         marginTop: 16,

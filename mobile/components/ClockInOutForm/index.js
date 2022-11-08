@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     clockInOutButton: {
         height: 180,
         width: 180,
-        borderRadius: "50%",
+        borderRadius: 90,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

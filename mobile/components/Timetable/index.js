@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { ScrollView, FlatList, StyleSheet } from 'react-native';
 import ScheduleListItem from '../ScheduleListItem/index';
-import { Text } from 'react-native-paper';
-import ScheduledWorkingTimesSum from '../ScheduledWorkingTimesSum';
 
 const Timetable = () => {
 
@@ -41,7 +39,6 @@ const Timetable = () => {
                 renderItem={renderFormattedSchedule}
                 keyExtractor={item => item.id}
             />
-            <ScheduledWorkingTimesSum scheduleWithWorkingTimes={formattedSchedules} />
         </ScrollView>
     )
 }

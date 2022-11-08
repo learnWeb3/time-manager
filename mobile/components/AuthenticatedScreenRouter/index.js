@@ -49,14 +49,15 @@ export default function AuthenticatedScreenRouter() {
                         {(props) => <ProfileScreen {...props} />}
                     </Tab.Screen>
                     <Tab.Screen name={routes.timetable.name} options={{
-                        title: `${routes.timetable.title} ${sum}`, tabBarIcon: ({ color, size }) => (
+                        headerTitle: `${routes.timetable.title} - ${sum} hours / week`,
+                        title: routes.timetable.title, tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
                         ),
                     }} >
                         {(props) => <TimetableScreen {...props} />}
                     </Tab.Screen>
                 </Tab.Navigator>
-            </NavigationContainer>
-        </DataLoader>
+            </NavigationContainer >
+        </DataLoader >
     );
 }
