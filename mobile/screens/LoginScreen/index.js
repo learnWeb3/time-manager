@@ -14,7 +14,7 @@ const LoginScreen = () => {
                <Image style={{ marginTop: 30, height: 45, width:'80%', resizeMode: 'stretch', maxWidth: "80%" }} source={require('../../assets/time_manager_icon.png')} />
             </View>
             <View style={styles.text}>
-               <Text style={{fontFamily:"Poppins",color:"#001f54"}} variant="headlineMedium">Sign in</Text>
+               <Text style={{fontFamily:"Poppins", color:"#001f54"}} variant="headlineMedium">Sign in</Text>
             </View>
             <View style={styles.login} >
                <LoginForm />

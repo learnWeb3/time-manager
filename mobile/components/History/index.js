@@ -39,9 +39,9 @@ const History = () => {
             <View style={styles.filterContainer}>
                 <Button textColor={selectedFilter === true ? "#FFF" : "#001f54"} style={{ width:"50%", borderRadius:0 , backgroundColor:(selectedFilter ? "#001f54" :"#FFF") }} mode={selectedFilter ? "contained" : "text"} onPress={() => setSelectedFilter(true)}>
                     Arrival
-                </Button>
+                </Button> 
                 <Button textColor={selectedFilter === false ? "#FFF" : "#001f54"} style={{ width:"50%", borderRadius:0 , backgroundColor:(!selectedFilter ? "#001f54" :"#FFF") }} mode={selectedFilter ? "text" : "contained"} onPress={() => setSelectedFilter(false)}>
-                    Deprature
+                    Departure
                 </Button>
             </View>
             <ScrollView style={styles.clocksListContainer}>
@@ -61,11 +61,13 @@ const styles = StyleSheet.create({
         height: "100%"
     },
     filterContainer: {
+        fontStyle:"Poppins",
         alignItems: "center",
         justifyContent: "start",
         display: "flex",
         flexDirection: "row",
         marginBottom: 16,
+        shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3
     }
 })
 
