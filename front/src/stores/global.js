@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { LocalStorage } from 'quasar'
+import { LocalStorage } from "quasar";
 
 export const useGlobalStore = defineStore("global", {
   state: () => ({
@@ -7,8 +7,68 @@ export const useGlobalStore = defineStore("global", {
     step: 1,
     stepLanding: 1,
     avatar: null,
+    options: {
+      chart: {
+        type: "bar",
+        id: "vuechart-example",
+      },
+      xaxis: {
+        categories: null,
+      },
+      title: {
+        text: "Hours",
+      },
+    },
+    options2: {
+      chart: {
+        id: "vuechart-example",
+      },
+      labels: null,
+    },
+    series: [],
+    series2: [],
+    options3: {
+      chart: {
+        height: 350,
+        type: "line",
+        zoom: {
+          enabled: false,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: "straight",
+      },
+      title: {
+        text: "Product Trends by Month",
+        align: "left",
+      },
+      grid: {
+        row: {
+          colors: ["#f3f3f3", "transparent"], // takes an array which will be repeated on columns
+          opacity: 0.5,
+        },
+      },
+      xaxis: {
+        categories: null,
+      },
+    },
+    series3: [
+      {
+        name: "Desktops",
+        data: null,
+      },
+      {
+        name: "Low - 2013",
+        data: [12, 11, 14, 18, 17, 13, 13, 34, 43],
+      },
+    ],
     user: null,
-    menu: 'User Detail',
+    menu: "User Detail",
+    menuGraph: "Daily",
+    daily: null,
     userEdit: true,
     inputEdit: false,
     stepUser: 1,
@@ -35,7 +95,7 @@ export const useGlobalStore = defineStore("global", {
         name: "User",
         value: 3,
       },
-    ]
+    ],
   }),
   getters: {},
   actions: {},
