@@ -52,9 +52,12 @@
             <q-select
               outlined
               v-model="model"
+              emit-value
+              map-options
+              option-label="name"
               :options="store.role"
               label="Role"
-              @update:model-value="store.createUser.role = model.value"
+              @update:model-value="store.createUser.role = model"
             />
           </div>
         </div>
@@ -143,6 +146,13 @@ export default defineComponent({
           console.log(error);
         });
       this.GetAllUser();
+      this.store.createUser = {
+        username: "",
+        email: "",
+        password: "",
+        jobtitle: "",
+        role: "",
+      };
     },
   },
 });

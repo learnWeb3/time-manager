@@ -106,6 +106,16 @@
               </template>
             </q-select>
           </div>
+          <div class="col-12 q-mt-lg flex justify-center">
+            <q-btn
+              size="xl"
+              unelevated
+              color="negative"
+              label="Logout"
+              @click="Logout()"
+              style="width: 225px"
+            />
+          </div>
         </div>
       </q-step>
     </q-stepper>
@@ -146,6 +156,11 @@ export default defineComponent({
     };
   },
   methods: {
+    Logout() {
+      LocalStorage.remove("JWT");
+      this.store.jwt = null;
+      this.store.stepLanding = 1;
+    },
     ActiveUser() {
       this.store.user = this.model;
       this.store.avatar = "https://eu.ui-avatars.com/api/?rounded=true&name=" + this.store.user.username
@@ -212,9 +227,8 @@ export default defineComponent({
 
       await axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data.token));
-          res = response.data.token;
-          LocalStorage.set("JWT", res);
+          console.log(JSON.stringify(response.data));
+          res = response.data;
           Loading.hide();
           success = true;
         })
@@ -222,7 +236,9 @@ export default defineComponent({
           console.log(error);
           Loading.hide();
         });
-      if (success === true) {
+      if (success === true && res.user.role === 1 || success === true && res.user.role === 2) {
+        LocalStorage.set("JWT", res.token);
+        this.store.jwt = LocalStorage.getItem("JWT"),
         this.store.stepLanding = 2;
       } else {
         Notify.create({

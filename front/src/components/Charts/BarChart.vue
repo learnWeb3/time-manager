@@ -1,27 +1,28 @@
 <template>
-    <div class="example">
-      <apexchart width="500" height="300" type="bar" :options="options" :series="series"></apexchart>
-    </div>
-  </template>
-    
-  <script>
-  export default {
-    el: '#appl',
-    data: function() {
-      return {
-        options: {
-          chart: {
-            id: 'vuechart-example'
-          },
-          xaxis: {
-            categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
-          }
-        },
-        series: [{
-          name: 'series-1',
-          data: [30, 40, 45, 50, 49, 60, 70, 91]
-        }]
-      }
-    }
-  }
-  </script>
+  <div class="example">
+    <apexchart
+      width="500"
+      height="300"
+      type="bar"
+      :options="store.options"
+      :series="store.series"
+    ></apexchart>
+  </div>
+</template>
+
+<script>
+import { date } from "quasar";
+import { useGlobalStore } from "stores/global";
+export default {
+  el: "#appl",
+  setup() {
+    const store = useGlobalStore();
+
+    return {
+      store,
+    };
+  },
+  methods: {},
+  mounted() {},
+};
+</script>
