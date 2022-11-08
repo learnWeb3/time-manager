@@ -495,16 +495,18 @@ export default defineComponent({
         }
         dura.push(parseFloat(time));
       });
-      for (let i = 0; i !== allDate.length; i++){
-        dura2.push(Math.round(this.PercentageChart(allDate[i].data, totaltime)))
+      for (let i = 0; i !== allDate.length; i++) {
+        dura2.push(
+          Math.round(this.PercentageChart(allDate[i].data, totaltime))
+        );
       }
       this.store.options.xaxis.categories = dayName;
       this.store.options3.xaxis.categories = dayName;
       this.store.options2.labels = dayName;
-      this.store.series.push({
+      this.store.series = [{
         name: "Duration",
         data: dura,
-      });
+      }];
       this.store.series2 = dura2;
       this.store.series3[0].data = dura;
       console.log(this.store.daily);

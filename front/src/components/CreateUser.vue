@@ -138,7 +138,7 @@ export default defineComponent({
         data: data,
       };
 
-      axios(config)
+      await axios(config)
         .then(function (response) {
           console.log(JSON.stringify(response.data));
         })
