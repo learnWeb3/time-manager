@@ -1,15 +1,7 @@
 const { join } = require('path')
-const isProd = process.env.NOD_ENV === "production"
-
-if (!isProd) {
-    require('dotenv').config({
-        path: join(process.cwd(), '.env')
-    })
-} else {
-    require('dotenv').config({
-        path: join(process.cwd(), '.env.production')
-    })
-}
+require('dotenv').config({
+    path: join(process.cwd(), '.env')
+});
 
 
 export default {
