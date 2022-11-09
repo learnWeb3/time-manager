@@ -88,7 +88,7 @@ rescue
 end
 
 try do
-  current_time_second = Application.get_unix_current_time()
+  current_time_second = 1667973600
   last_year_second = current_time_second - 365 * 24 * 60 * 60
 
   users = Application.list_users(%{})

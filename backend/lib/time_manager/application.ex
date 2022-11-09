@@ -354,6 +354,7 @@ defmodule TimeManager.Application do
     startDate = Map.get(params, "start", "#{unix_datetime - year_in_seconds}")
     # default to current datetime in seconds
     endDate = Map.get(params, "end", "#{unix_datetime}")
+
     {startDatetime, _} = Integer.parse(startDate)
     {endDatetime, _} = Integer.parse(endDate)
 
@@ -465,9 +466,8 @@ defmodule TimeManager.Application do
 
   def get_user!(id) do
     user = Repo.get(User, id)
-
     if is_nil(user) do
-      raise NotFoundError, message: "user not found for user with id " <> id
+      raise NotFoundError, message: "user not found for user with id " <> Integer.to_string(id)
     else
       user
     end
