@@ -55,6 +55,7 @@ const LoginForm = () => {
                 throw new Error('missing token field in response call')
             }
         } catch (error) {
+            console.log(error)
             message = "An unexpected error has been encountered, please try again later or contact tour administrator"
         } finally {
             setAlert({

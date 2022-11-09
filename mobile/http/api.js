@@ -26,6 +26,7 @@ const mergeAuthHeaders = (axiosInstance, token) => {
 }
 
 export const login = async (data = { email: "", password: "" }) => {
+    console.log(httpApi.defaults.headers)
     return await httpApi.post('/sessions/login', data).then((response) => response.data)
 }
 
