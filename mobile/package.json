@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "build:android:apk": "NODE_ENV=production eas build -p android --profile preview",
+    "build:android:apk": "eas build -p android --profile preview",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
