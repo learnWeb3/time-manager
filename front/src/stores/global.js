@@ -57,18 +57,141 @@ export const useGlobalStore = defineStore("global", {
     },
     series3: [
       {
-        name: "Desktops",
+        name: "Duration",
         data: null,
       },
       {
-        name: "Low - 2013",
-        data: [12, 11, 14, 18, 17, 13, 13, 34, 43],
+        name: "Average All User",
+        data: [],
+      },
+    ],
+    optionsMonthly: {
+      chart: {
+        type: "bar",
+        id: "vuechart-example",
+      },
+      xaxis: {
+        categories: null,
+      },
+      title: {
+        text: "Hours",
+      },
+    },
+    options2Monthly: {
+      chart: {
+        id: "vuechart-example",
+      },
+      labels: null,
+    },
+    seriesMonthly: [],
+    series2Monthly: [],
+    options3Monthly: {
+      chart: {
+        height: 350,
+        type: "line",
+        zoom: {
+          enabled: false,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: "straight",
+      },
+      title: {
+        text: "Product Trends by Month",
+        align: "left",
+      },
+      grid: {
+        row: {
+          colors: ["#f3f3f3", "transparent"], // takes an array which will be repeated on columns
+          opacity: 0.5,
+        },
+      },
+      xaxis: {
+        categories: null,
+      },
+    },
+    series3Monthly: [
+      {
+        name: "Duration",
+        data: null,
+      },
+      {
+        name: "Average All User",
+        data: [],
+      },
+    ],
+    optionsWeekly: {
+      chart: {
+        type: "bar",
+        id: "vuechart-example",
+      },
+      xaxis: {
+        categories: null,
+      },
+      title: {
+        text: "Hours",
+      },
+    },
+    options2Weekly: {
+      chart: {
+        id: "vuechart-example",
+      },
+      labels: null,
+    },
+    seriesWeekly: [],
+    series2Weekly: [],
+    options3Weekly: {
+      chart: {
+        height: 350,
+        type: "line",
+        zoom: {
+          enabled: false,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: "straight",
+      },
+      title: {
+        text: "Product Trends by Month",
+        align: "left",
+      },
+      grid: {
+        row: {
+          colors: ["#f3f3f3", "transparent"], // takes an array which will be repeated on columns
+          opacity: 0.5,
+        },
+      },
+      xaxis: {
+        categories: null,
+      },
+    },
+    series3Weekly: [
+      {
+        name: "Duration",
+        data: null,
+      },
+      {
+        name: "Average All User",
+        data: [],
       },
     ],
     user: null,
     menu: "User Detail",
-    menuGraph: "Daily",
+    menuGraphDaily: true,
+    menuGraphWeekly: false,
+    menuGraphMonthly: false,
     daily: null,
+    dailyAllUser: null,
+    weekly: null,
+    weeklyAllUser: null,
+    monthly: null,
+    monthlyAllUser: null,
     userEdit: true,
     inputEdit: false,
     stepUser: 1,
@@ -80,7 +203,14 @@ export const useGlobalStore = defineStore("global", {
       jobtitle: "",
       role: "",
     },
-    selectedUser: null,
+    selectedUser:  {
+      id: "",
+      username: "",
+      email: "",
+      password: "",
+      jobtitle: "",
+      role: "",
+    },
     allUser: null,
     role: [
       {

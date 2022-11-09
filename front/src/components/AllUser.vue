@@ -13,7 +13,27 @@
 
         <div>
           <q-avatar>
-            <img src="https://cdn.quasar.dev/img/avatar.png" />
+            <img src="../../public/icons/manager.png" />
+            <q-menu>
+              <div class="row no-wrap q-pa-md">
+                <div class="column items-center">
+                  <q-avatar size="72px">
+                    <img src="../../public/icons/manager.png" />
+                  </q-avatar>
+
+                  <div class="text-subtitle1 q-mt-sm q-mb-xs">Manager</div>
+
+                  <q-btn
+                    color="primary"
+                    label="Go Back"
+                    unelevated
+                    size="sm"
+                    @click="GoBack()"
+                    v-close-popup
+                  />
+                </div>
+              </div>
+            </q-menu>
           </q-avatar>
         </div>
       </q-toolbar>
@@ -43,7 +63,7 @@
             <div class="col-12 q-py-md">
               <q-table
                 title="Treats"
-                :rows="rows"
+                :rows="store.allUser"
                 :columns="columns"
                 :filter="filter"
                 row-key="username"
@@ -83,8 +103,10 @@
                         color="accent"
                         round
                         dense
-                        @click="props.expand = !props.expand"
-                        :icon="props.expand ? 'remove' : 'add'"
+                        icon="visibility"
+                        @click="
+                          (store.selectedUser = props.row), ActiveUser()
+                        "
                       />
                     </q-td>
                     <q-td
@@ -104,12 +126,9 @@
                           (store.selectedUser = props.row), (dialog = true)
                         "
                       />
-                      <q-btn flat round color="negative" icon="delete" />
-                    </q-td>
-                  </q-tr>
-                  <q-tr v-show="props.expand" :props="props">
-                    <q-td colspan="100%">
-                      <div class="text-left">Working Time</div>
+                      <q-btn flat round color="negative" icon="delete" @click="
+                          (store.selectedUser = props.row), DeleteUser()
+                        " />
                     </q-td>
                   </q-tr>
                 </template>
@@ -123,7 +142,7 @@
                   <q-separator />
 
                   <q-card-section
-                    style="max-height: 50vh"
+                    style="max-height: 60vh"
                     class="col-12 row scroll"
                   >
                     <div class="col-12 row items-center justify-center">
@@ -139,17 +158,39 @@
                       <div class="col-8 q-mt-lg">
                         <q-input
                           outlined
+                          v-model="store.selectedUser.password"
+                          label="Password"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 row items-center justify-center">
+                      <div class="col-8 q-mt-lg">
+                        <q-input
+                          outlined
                           v-model="store.selectedUser.email"
                           label="Email"
                         />
                       </div>
                     </div>
                     <div class="col-12 row items-center justify-center">
-                      <div class="col-8 q-my-lg">
+                      <div class="col-8 q-mt-lg">
                         <q-input
                           outlined
-                          v-model="store.selectedUser.profession"
+                          v-model="store.selectedUser.jobtitle"
                           label="Profession"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 row items-center justify-center">
+                      <div class="col-8 q-my-lg">
+                        <q-select
+                          outlined
+                          v-model="store.selectedUser.role"
+                          emit-value
+                          map-options
+                          option-label="name"
+                          :options="store.role"
+                          label="Role"
                         />
                       </div>
                     </div>
@@ -176,34 +217,100 @@
         <div class="col-12 q-px-xl q-my-md">
           <div class="row">
             <div class="col-2 row q-mt-md">
-              <span class="text-weight-bold" style="font-size: 1.5em; color: #001f54">Dashboard</span>
+              <span
+                class="text-weight-bold"
+                style="font-size: 1.5em; color: #001f54"
+                >Dashboard</span
+              >
             </div>
             <div class="col-4 row q-mt-md justify-between justify-center">
-              <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Weekly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Weekly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Weekly" @click="store.menu = 'Weekly', store.stepUser = 2"/>
+              <div class="col-3 flex justify-center">
+                <q-btn
+                  :outline="store.menuGraphDaily === true ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menuGraphDaily === true
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Daily"
+                  @click="
+                    (store.menuGraphDaily = true),
+                      (store.menuGraphWeekly = false),
+                      (store.menuGraphMonthly = false),
+                      (store.stepUser = 2),
+                      ValueGraphDaily()
+                  "
+                />
               </div>
               <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Monthly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Monthly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Monthly" @click="store.menu = 'Monthly', store.stepUser = 2"/>
+                <q-btn
+                  :outline="store.menuGraphWeekly === true ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menuGraphWeekly === true
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Weekly"
+                  @click="
+                    (store.menuGraphDaily = false),
+                      (store.menuGraphWeekly = true),
+                      (store.menuGraphMonthly = false),
+                      (store.stepUser = 2),
+                      ValueGraphWeekly()
+                  "
+                />
               </div>
               <div class="col-4 flex justify-center">
-                <q-btn :outline="store.menu === 'Yearly' ? false : true" rounded unelevated size="md" :style="store.menu === 'Yearly' ? 'background-color: #001f54; color: white' : 'color: #0a1128'" label="Yearly" @click="store.menu = 'Yearly', store.stepUser = 2"/>
+                <q-btn
+                  :outline="store.menuGraphMonthly === true ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menuGraphMonthly === true
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Monthly"
+                  @click="
+                    (store.menuGraphDaily = false),
+                      (store.menuGraphWeekly = false),
+                      (store.menuGraphMonthly = true),
+                      (store.stepUser = 2),
+                      ValueGraphMonthly()
+                  "
+                />
               </div>
-              
             </div>
           </div>
-
-          <div class="col-12 row q-mt-md">
-            <div class="col-12 q-mt-md ">
-              <BarChart />
+          <q-slide-transition appear>
+            <div v-if="store.menuGraphDaily" class="col-12 row q-mt-md">
+              <div class="col-12 q-mt-md">
+                <BarChartDaily />
+              </div>
             </div>
-            <div class="col-12 q-mt-md">
-              <PieChart />
+          </q-slide-transition>
+          <q-slide-transition appear>
+            <div v-if="store.menuGraphWeekly" class="col-12 row q-mt-md">
+              <div class="col-12 q-mt-md">
+                <BarChartWeekly />
+              </div>
             </div>
-          </div>
-          <div class="col-12 q-mt-md row ">
-            <LineChart />
-          </div>
-        </div></q-step>
+          </q-slide-transition>
+          <q-slide-transition appear>
+            <div v-if="store.menuGraphMonthly" class="col-12 row q-mt-md">
+              <div class="col-12 q-mt-md">
+                <BarChartMonthly />
+              </div>
+            </div>
+          </q-slide-transition></div
+      ></q-step>
     </q-stepper>
   </div>
 </template>
@@ -212,9 +319,10 @@
 import { defineComponent, ref } from "vue";
 import { useGlobalStore } from "stores/global";
 import LeftMenu from "components/LeftMenu.vue";
-import BarChart from "src/components/Charts/BarChart.vue";
-import LineChart from "src/components/Charts/LineChart.vue";
-import PieChart from "src/components/Charts/PieChart.vue";
+import BarChartDaily from "src/components/Charts/BarChartDaily.vue";
+import BarChartMonthly from "src/components/Charts/BarChartMonthly.vue";
+import BarChartWeekly from "src/components/Charts/BarChartWeekly.vue";
+import axios from "axios";
 
 const columns = [
   {
@@ -234,38 +342,10 @@ const columns = [
     sortable: true,
   },
   {
-    name: "profession",
+    name: "jobtitle",
     label: "Profession",
-    field: "profession",
+    field: "jobtitle",
     sortable: true,
-  },
-];
-
-const rows = [
-  {
-    username: "Samuel Cadau",
-    email: "test@gmail.com",
-    profession: "Full-stack",
-  },
-  {
-    username: "Antoine Le-Guillou",
-    email: "test@gmail.com",
-    profession: "Full-stack2",
-  },
-  {
-    username: "Mohamed Lahcen",
-    email: "test@gmail.com",
-    profession: "Full-stack3",
-  },
-  {
-    username: "Charlène Obadia",
-    email: "test@gmail.com",
-    profession: "Full-stack4",
-  },
-  {
-    username: "Serge le bidon",
-    email: "test@gmail.com",
-    profession: "Full-stack5",
   },
 ];
 
@@ -283,15 +363,391 @@ export default defineComponent({
       leftDrawerOpen,
       dialog,
       columns,
-      rows,
       filter,
     };
   },
+  methods: {
+    ActiveUser() {
+      this.store.user = this.store.selectedUser;
+      this.store.user.password = "";
+      this.store.avatar = "https://eu.ui-avatars.com/api/?rounded=true&name=" + this.store.user.username
+      switch (this.store.user.role) {
+        case 1:
+          this.store.user.role = {
+            name: "Admin",
+            value: 1,
+          };
+          break;
+        case 2:
+          this.store.user.role = {
+            name: "Manager",
+            value: 2,
+          };
+          break;
+        case 3:
+          this.store.user.role = {
+            name: "User",
+            value: 3,
+          };
+          break;
+      }
+      this.store.step = 2;
+    },
+    async UpdateUser() {
+      if (this.store.selectedUser.role.name) {
+        this.store.selectedUser.role = this.store.user.selectedUser.value;
+      }
+      var data = {
+        user: {
+          role: this.store.selectedUser.role,
+          username: this.store.selectedUser.username,
+          email: this.store.selectedUser.email,
+          password: this.store.selectedUser.password,
+          jobtitle: this.store.selectedUser.jobtitle,
+        },
+      };
+
+      var config = {
+        method: "put",
+        url: process.env.API_ROOT_URL + "/users/" + this.store.selectedUser.id,
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+        data: data,
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    async DeleteUser() {
+      var config = {
+        method: "delete",
+        url: process.env.API_ROOT_URL + "/users/" + this.store.selectedUser.id,
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.store.step = 1;
+    },
+    GoBack() {
+      this.store.step = 1;
+    },
+    async ValueGraphMonthly() {
+      let final;
+      var config = {
+        method: "get",
+        url:
+          process.env.API_ROOT_URL + "/clocks/presence?periodicity=month",
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(response.data.data);
+          final = response.data.data;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.store.monthly = final;
+      this.SortMonthly();
+    },
+    async ValueGraphWeekly() {
+      let final;
+      let dateStart = Math.floor(Date.now() / 1000) - 7 * 86400 * 12;
+      let dateEnd = Math.floor(Date.now() / 1000);
+      var config = {
+        method: "get",
+        url:
+          process.env.API_ROOT_URL + "/clocks/presence?periodicity=week&start=" +
+          dateStart +
+          "&end=" +
+          dateEnd,
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(response.data.data);
+          final = response.data.data;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.store.weekly = final;
+      this.SortWeek();
+    },
+    async ValueGraphDaily() {
+      let final;
+      let dateStart = Math.floor(Date.now() / 1000) - 7 * 86400;
+      let dateEnd = Math.floor(Date.now() / 1000);
+      var config = {
+        method: "get",
+        url:
+          process.env.API_ROOT_URL + "/clocks/presence?periodicity=day&start=" +
+          dateStart +
+          "&end=" +
+          dateEnd,
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(response.data.data);
+          final = response.data.data;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.store.daily = final;
+      this.SortDay();
+    },
+    onlyUnique(value, index, self) {
+      return self.indexOf(value) === index;
+    },
+    SortMonthly() {
+      let allDate = [];
+      let dayName = [];
+      let dura = [];
+      let dura2 = [];
+      let time = null;
+      let totaltime = null;
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      this.store.monthly.forEach(function (item) {
+        let date = monthNames[item.periodicity - 1];
+        allDate.push({ date: date, data: item.duration });
+      });
+      allDate.sort(function (a, b) {
+        return a.date - b.date;
+      });
+      allDate.forEach(function (item) {
+        dayName.push(item.date);
+        totaltime = totaltime + item.data;
+        let d = Number(item.data);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor((d % 3600) / 60);
+        var s = Math.floor((d % 3600) % 60);
+        time = "" + h + ".";
+        if (m < 10) {
+          time = time + "0" + m;
+        } else {
+          time = time + m;
+        }
+        if (s > 0) {
+          if (s < 10) {
+            time = time + "0" + s;
+          } else {
+            time = time + s;
+          }
+        }
+        dura.push({date: item.date, data:parseFloat(time)});
+      });
+      let unique = [...new Set(dayName)];
+      let sameDate = null;
+      let average = null;
+      let tmpData = [];
+      for (let i = 0; i !== unique.length; i++) {
+        sameDate = dura.filter((item) => item.date === unique[i]);
+        sameDate.forEach(function (item) {
+          item.data = parseFloat(item.data);
+        });
+        average =
+          sameDate.reduce((total, next) => total + next.data, 0) /
+          sameDate.length;
+        average = Number(average);
+        average = average.toFixed(3);
+        tmpData.push(average);
+      }
+      this.store.optionsMonthly.xaxis.categories = unique;
+      this.store.options3Monthly.xaxis.categories = unique;
+      this.store.options2Monthly.labels = unique;
+      this.store.seriesMonthly = [
+        {
+          name: "Duration average all user",
+          data: tmpData,
+        },
+      ];
+      this.store.series3Monthly[0].data = tmpData;
+    },
+    SortWeek() {
+      let allDate = [];
+      let dayName = [];
+      let dura = [];
+      let dura2 = [];
+      let time = null;
+      let totaltime = null;
+      this.store.weekly.forEach(function (item) {
+        allDate.push({ date: item.periodicity, data: item.duration });
+      });
+      allDate.sort(function (a, b) {
+        return a.date - b.date;
+      });
+      allDate.forEach(function (item) {
+        item.date = "Week " + item.date;
+        dayName.push(item.date);
+        totaltime = totaltime + item.data;
+        let d = Number(item.data);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor((d % 3600) / 60);
+        var s = Math.floor((d % 3600) % 60);
+        time = "" + h + ".";
+        if (m < 10) {
+          time = time + "0" + m;
+        } else {
+          time = time + m;
+        }
+        if (s > 0) {
+          if (s < 10) {
+            time = time + "0" + s;
+          } else {
+            time = time + s;
+          }
+        }
+        dura.push({date: item.date, data:parseFloat(time)});
+      });
+      let unique = [...new Set(dayName)];
+      let sameDate = null;
+      let average = null;
+      let tmpData = [];
+      for (let i = 0; i !== unique.length; i++) {
+        sameDate = dura.filter((item) => item.date === unique[i]);
+        sameDate.forEach(function (item) {
+          item.data = parseFloat(item.data);
+        });
+        average =
+          sameDate.reduce((total, next) => total + next.data, 0) /
+          sameDate.length;
+        average = Number(average);
+        average = average.toFixed(3);
+        tmpData.push(average);
+      }
+      this.store.optionsWeekly.xaxis.categories = unique;
+      this.store.options3Weekly.xaxis.categories = unique;
+      this.store.options2Weekly.labels = unique;
+      this.store.seriesWeekly = [
+        {
+          name: "Duration average all user",
+          data: tmpData,
+        },
+      ];
+      this.store.series3Weekly[0].data = tmpData;
+    },
+    SortDay() {
+      let allDate = [];
+      let dayName = [];
+      let dura = [];
+      let dura2 = [];
+      let time = null;
+      let totaltime = null;
+      this.store.daily.forEach(function (item) {
+        let tmp = item.periodicity.split(":");
+        let day = tmp[0];
+        let month = tmp[1] - 1;
+        let year = tmp[2];
+        let date = new Date(year, month, day);
+        allDate.push({ date: date, data: item.duration });
+      });
+      allDate.sort(function (a, b) {
+        return a.date - b.date;
+      });
+      allDate.forEach(function (item) {
+        let name = item.date.toLocaleDateString("fr-FR", { weekday: "long" });
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        dayName.push(name);
+        console.log(item.data);
+        totaltime = totaltime + item.data;
+        let d = Number(item.data);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor((d % 3600) / 60);
+        var s = Math.floor((d % 3600) % 60);
+        time = "" + h + ".";
+        if (m < 10) {
+          time = time + "0" + m;
+        } else {
+          time = time + m;
+        }
+        if (s > 0) {
+          if (s < 10) {
+            time = time + "0" + s;
+          } else {
+            time = time + s;
+          }
+        }
+        dura.push({date: name, data:parseFloat(time)});
+      });
+      let unique = [...new Set(dayName)];
+      let sameDate = null;
+      let average = null;
+      let tmpData = [];
+      for (let i = 0; i !== unique.length; i++) {
+        sameDate = dura.filter((item) => item.date === unique[i]);
+        sameDate.forEach(function (item) {
+          item.data = parseFloat(item.data);
+        });
+        average =
+          sameDate.reduce((total, next) => total + next.data, 0) /
+          sameDate.length;
+        average = Number(average);
+        average = average.toFixed(3);
+        tmpData.push(average);
+      }
+      this.store.options.xaxis.categories = unique;
+      this.store.options3.xaxis.categories = unique;
+      this.store.options2.labels = unique;
+      this.store.series = [
+        {
+          name: "Duration average all user",
+          data: tmpData,
+        },
+      ];
+      this.store.series3[0].data = tmpData;
+    },
+    PercentageChart(partialValue, totalValue) {
+      return (100 * partialValue) / totalValue;
+    },
+  },
+  mounted() {
+    this.ValueGraphDaily();
+    this.ValueGraphWeekly();
+      this.ValueGraphMonthly();
+  },
   components: {
     LeftMenu,
-    BarChart,
-    LineChart,
-    PieChart,
+    BarChartDaily,
+    BarChartMonthly,
+    BarChartWeekly,
   },
 });
 </script>
