@@ -38,4 +38,4 @@ RUN chmod 755 /cron_tasks/daily_clock_manager.sh
 RUN touch /var/log/script.log
 RUN /usr/bin/crontab /cron_tasks/crontab.txt
 
-CMD /usr/sbin/crond -f -l 8 & MIX_ENV=prod mix ecto create & MIX_ENV=prod mix ecto.migrate & MIX_ENV=prod mix run ./priv/repo/seeds.exs & SSL_ENABLED=${SSL_ENABLED} MIX_ENV=prod PORT=${CONTAINER_PORT} mix phx.server
+CMD /usr/sbin/crond -f -l 8 & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix ecto create & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix ecto.migrate & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix run ./priv/repo/seeds.exs & SSL_ENABLED=${SSL_ENABLED} MIX_ENV=prod PORT=${CONTAINER_PORT} mix phx.server
