@@ -35,6 +35,6 @@ jobs:
           registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           registry-username: ${{ secrets.REGISTRY_USERNAME }}
           registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-          environment-variables: SSL_ENABLED={{ secrets.SSL_ENABLED }} SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} DATABASE_URL=${{ secrets.DATABASE_URL }}  CONTAINER_PORT=${{ secrets.CONTAINER_PORT }}
+          environment-variables: SSL_ENABLED=${{ secrets.SSL_ENABLED }} SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} DATABASE_URL=${{ secrets.DATABASE_URL }}  CONTAINER_PORT=${{ secrets.CONTAINER_PORT }}
           name: time-manager--backend
           location: 'francecentral'
