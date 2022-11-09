@@ -12,7 +12,7 @@ const httpApi = axios.create({
 httpApi.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
-    if (error.response.status === 401) {
+    if (error && error.response && error.response.status === 401) {
         LocalStorage.removeData(env.LOCAL_STORAGE_CURRENT_USER_KEY)
             .then(() => setCurrentUser(null))
     }
@@ -27,6 +27,44 @@ const mergeAuthHeaders = (axiosInstance, token) => {
 
 export const login = async (data = { email: "", password: "" }) => {
     return await httpApi.post('/sessions/login', data).then((response) => response.data)
+}
+
+export const getProfileInformations = async (token, userId) => {
+    return mergeAuthHeaders(httpApi, token).get(`/users/${userId}`)
+        .then((response) => response.data)
+}
+
+export const getSchedules = async (token) => {
+    return mergeAuthHeaders(httpApi, token).get(`/schedules`)
+        .then((response) => response.data)
+}
+
+export const getWorkingTimes = async (token, userId) => {
+    return mergeAuthHeaders(httpApi, token).get(`/workingtimes/${userId}`)
+        .then((response) => response.data)
+}
+
+export const createWorkingTime = (token, userId, data = {
+    "schedule_id": null
+}) => mergeAuthHeaders(httpApi, token)
+    .post(`/workingtimes/${userId}`, {
+        working_time: data
+    })
+    .then((response) => response.data)
+
+export const deleteWorkingTime = (token, workingtimeId) => mergeAuthHeaders(httpApi, token)
+    .delete(`/workingtimes/${workingtimeId}`)
+    .then((response) => response.data)
+
+export const updateProfileInformations = async (token, userId, data = {
+    email: "",
+    jobtitle: "",
+    username: ""
+}) => {
+
+    return await mergeAuthHeaders(httpApi, token).put(`/users/${userId}`, {
+        user: data
+    }).then((response) => response.data)
 }
 
 export const getUserStatus = (token, userId) => mergeAuthHeaders(httpApi, token)

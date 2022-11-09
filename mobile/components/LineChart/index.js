@@ -1,16 +1,11 @@
 import {
-    LineChart,
-    BarChart,
-    PieChart,
-    ProgressChart,
-    ContributionGraph,
-    StackedBarChart
+    LineChart
 } from "react-native-chart-kit";
 
 import * as React from 'react';
 
 const ApplicationLineChart = ({
-    legend = ["Rainy days"],
+    legend = [],
     width = 400,
     labels = ["January", "February", "March", "April", "May", "June"],
     datasets = [

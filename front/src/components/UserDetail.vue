@@ -264,49 +264,49 @@
               >
             </div>
             <div class="col-4 row q-mt-md justify-between justify-center">
-              <div class="col-4 flex justify-center">
+              <div class="col-3 flex justify-center">
                 <q-btn
-                  :outline="store.menu === 'Weekly' ? false : true"
+                  :outline="store.menuGraph === 'Daily' ? false : true"
                   rounded
                   unelevated
                   size="md"
                   :style="
-                    store.menu === 'Weekly'
+                    store.menuGraph === 'Daily'
+                      ? 'background-color: #001f54; color: white'
+                      : 'color: #0a1128'
+                  "
+                  label="Daily"
+                  @click="(store.menuGraph = 'Daily'), (store.stepUser = 2)"
+                />
+              </div>
+              <div class="col-4 flex justify-center">
+                <q-btn
+                  :outline="store.menuGraph === 'Weekly' ? false : true"
+                  rounded
+                  unelevated
+                  size="md"
+                  :style="
+                    store.menuGraph === 'Weekly'
                       ? 'background-color: #001f54; color: white'
                       : 'color: #0a1128'
                   "
                   label="Weekly"
-                  @click="(store.menu = 'Weekly'), (store.stepUser = 2)"
+                  @click="(store.menuGraph = 'Weekly'), (store.stepUser = 2)"
                 />
               </div>
               <div class="col-4 flex justify-center">
                 <q-btn
-                  :outline="store.menu === 'Monthly' ? false : true"
+                  :outline="store.menuGraph === 'Monthly' ? false : true"
                   rounded
                   unelevated
                   size="md"
                   :style="
-                    store.menu === 'Monthly'
+                    store.menuGraph === 'Monthly'
                       ? 'background-color: #001f54; color: white'
                       : 'color: #0a1128'
                   "
                   label="Monthly"
-                  @click="(store.menu = 'Monthly'), (store.stepUser = 2)"
-                />
-              </div>
-              <div class="col-4 flex justify-center">
-                <q-btn
-                  :outline="store.menu === 'Yearly' ? false : true"
-                  rounded
-                  unelevated
-                  size="md"
-                  :style="
-                    store.menu === 'Yearly'
-                      ? 'background-color: #001f54; color: white'
-                      : 'color: #0a1128'
-                  "
-                  label="Yearly"
-                  @click="(store.menu = 'Yearly'), (store.stepUser = 2)"
+                  @click="(store.menuGraph = 'Monthly'), (store.stepUser = 2)"
                 />
               </div>
             </div>
@@ -337,7 +337,7 @@ import BarChart from "src/components/Charts/BarChart.vue";
 import LineChart from "src/components/Charts/LineChart.vue";
 import PieChart from "src/components/Charts/PieChart.vue";
 import axios from "axios";
-import { LocalStorage } from 'quasar'
+import { LocalStorage } from "quasar";
 
 export default defineComponent({
   name: "UserDetail",
@@ -423,6 +423,100 @@ export default defineComponent({
         });
       this.store.step = 1;
     },
+    async ValueGraphDaily() {
+      let final;
+      let dateStart = Math.floor(Date.now() / 1000) - 7 * 86400;
+      let dateEnd = Math.floor(Date.now() / 1000);
+      var config = {
+        method: "get",
+        url:
+          "http://localhost:4000/api/clocks/presence?userId=" +
+          this.store.user.id +
+          "&periodicity=day&start=" +
+          dateStart +
+          "&end=" +
+          dateEnd,
+        headers: {
+          Authorization: "Bearer " + this.store.jwt,
+        },
+      };
+
+      await axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data.data));
+          final = response.data.data;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.store.daily = final;
+      this.SortDay();
+    },
+    SortDay() {
+      let allDate = [];
+      let dayName = [];
+      let dura = [];
+      let dura2 = [];
+      let time = null;
+      let totaltime = null;
+      this.store.daily.forEach(function (item) {
+        let tmp = item.periodicity.split(":");
+        let day = tmp[0];
+        let month = tmp[1] - 1;
+        let year = tmp[2];
+        let date = new Date(year, month, day);
+        allDate.push({ date: date, data: item.duration });
+      });
+      allDate.sort(function (a, b) {
+        return a.date - b.date;
+      });
+      allDate.forEach(function (item) {
+        let name = item.date.toLocaleDateString("fr-FR", { weekday: "long" });
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        dayName.push(name);
+        console.log(item.data);
+        totaltime = totaltime + item.data;
+        let d = Number(item.data);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor((d % 3600) / 60);
+        var s = Math.floor((d % 3600) % 60);
+        time = "" + h + ".";
+        if (m < 10) {
+          time = time + "0" + m;
+        } else {
+          time = time + m;
+        }
+        if (s > 0) {
+          if (s < 10) {
+            time = time + "0" + s;
+          } else {
+            time = time + s;
+          }
+        }
+        dura.push(parseFloat(time));
+      });
+      for (let i = 0; i !== allDate.length; i++) {
+        dura2.push(
+          Math.round(this.PercentageChart(allDate[i].data, totaltime))
+        );
+      }
+      this.store.options.xaxis.categories = dayName;
+      this.store.options3.xaxis.categories = dayName;
+      this.store.options2.labels = dayName;
+      this.store.series = [{
+        name: "Duration",
+        data: dura,
+      }];
+      this.store.series2 = dura2;
+      this.store.series3[0].data = dura;
+      console.log(this.store.daily);
+    },
+    PercentageChart(partialValue, totalValue) {
+      return (100 * partialValue) / totalValue;
+    },
+  },
+  mounted() {
+    this.ValueGraphDaily();
   },
 });
 </script>

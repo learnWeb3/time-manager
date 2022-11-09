@@ -1,16 +1,14 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import ApplicationLineChart from '../LineChart/index';
 import { useSelector } from 'react-redux';
 import { getUserPresences } from '../../http/api';
-import { Button } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 
 const Dashboard = () => {
 
     const currentUser = useSelector((state) => state.currentUser.value);
-    const viewContainerRef = React.useRef(null);
     const [presenceData, setPresenceData] = React.useState(null)
-    const [viewContainerWidth, setViewContainerWidth] = React.useState(0)
     const [selectedPeriodicity, setSelectedPeriodicity] = React.useState("day")
 
     React.useEffect(() => {
@@ -20,15 +18,11 @@ const Dashboard = () => {
         }
     }, [currentUser, selectedPeriodicity])
 
-    React.useEffect(() => {
-        if (viewContainerRef) {
-            const { width } = viewContainerRef.current.getBoundingClientRect()
-            setViewContainerWidth(width)
-        }
-    }, [viewContainerRef])
+    
+
 
     return (
-        <View ref={viewContainerRef} style={styles.container}>
+        <View style={styles.container}>
 
             <View style={styles.filterContainer}>
                 <Button textColor={selectedPeriodicity === "day" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8, borderRadius:0, fontSize:10 }} mode={selectedPeriodicity === "day" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("day")}>
@@ -44,13 +38,12 @@ const Dashboard = () => {
                     Year
                 </Button>
             </View>
-
-            {viewContainerWidth && presenceData && <ApplicationLineChart
+            {presenceData ? <ApplicationLineChart
                 legend={['Presence time']}
                 labels={presenceData.map((dataItem) => dataItem.periodicity)}
                 datasets={[presenceData.map((dataItem) => dataItem.duration / 3600)]}
-                width={viewContainerWidth}
-            />}
+                width={Dimensions.get('window').width}
+            /> : <Text></Text>}
         </View>
     )
 }
@@ -58,6 +51,8 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
     filterContainer: {
         width:"100%",
+        alignItems: "center",
+        justifyContent: "flex-start",
         display: "flex",
         flexDirection: "row",
         marginBottom: 30,

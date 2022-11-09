@@ -22,12 +22,6 @@ export const validatePassword = (key, value) => {
         errors: requiredFieldErrors,
     } = validateRequired(key, value)
     errors.push(...requiredFieldErrors)
-    // if (value && value.length) {
-    //     const minPasswordLength = 6
-    //     if (value.length < minPasswordLength) {
-    //         errors.push(`invalid password format for ${key}, must be least ${minPasswordLength} characters`)
-    //     }
-    // }
     return {
         errors,
         isValid: errors.length === 0

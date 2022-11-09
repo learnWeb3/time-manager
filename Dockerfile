@@ -30,7 +30,7 @@ RUN mix deps.get
 RUN mix compile
 
 # Compile assets
-RUN MIX_ENV=prod DATABASE_URL=${DATABASE_URL} SECRET_KEY_BASE=${SECRET_KEY_BASE} mix assets.deploy
+RUN MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} DATABASE_URL=${DATABASE_URL} SECRET_KEY_BASE=${SECRET_KEY_BASE} mix assets.deploy
 
 # copy cron tasks
 COPY /cron_tasks /cron_tasks/
@@ -38,4 +38,4 @@ RUN chmod 755 /cron_tasks/daily_clock_manager.sh
 RUN touch /var/log/script.log
 RUN /usr/bin/crontab /cron_tasks/crontab.txt
 
-CMD /usr/sbin/crond -f -l 8 & MIX_ENV=prod mix ecto create & MIX_ENV=prod mix ecto.migrate & MIX_ENV=prod mix run ./priv/repo/seeds.exs & MIX_ENV=prod PORT=${CONTAINER_PORT} mix phx.server
+CMD /usr/sbin/crond -f -l 8 & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix ecto create & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix ecto.migrate & MIX_ENV=prod SSL_ENABLED=${SSL_ENABLED} mix run ./priv/repo/seeds.exs & SSL_ENABLED=${SSL_ENABLED} MIX_ENV=prod PORT=${CONTAINER_PORT} mix phx.server

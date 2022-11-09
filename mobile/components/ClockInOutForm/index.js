@@ -2,36 +2,21 @@ import React , {useEffect,useState} from 'react';
 import { ScrollView, StyleSheet, View, Image, Dimensions } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { createClock, getUserStatus } from '../../http/api';
+import { createClock } from '../../http/api';
 import { useAlert } from '../../hooks/alert';
 import { ApplicationDate } from '../../date/index';
 import { addNewCurrentUserClock } from '../../stores/reducers/currentUserClocksReducer';
+import { setCurrentUserStatus } from '../../stores/reducers/currentUserStatusReducer';
+
 
 const CLockInOutForm = () => {
-
     const dispatch = useDispatch();
     const [timeIntervalRef, setTimeIntervalRef] = React.useState(null)
     const { alert, setAlert, component: Snackbar } = useAlert()
     const currentUser = useSelector((state) => state.currentUser.value)
-    const [status, setStatus] = React.useState(null)
-    const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null);
-    const [isLandscape, setIsLandscape] = React.useState(false);
+    const status = useSelector((state) => state.currentUserStatus.value)
 
-    React.useEffect(() => {
-        if (currentUser) {
-            getUserStatus(currentUser.token, currentUser.user.id).then((status) => setStatus(status.data ? status.data : "no data"))
-        }
-    }, [currentUser])
-
-    // useEffect(()=>{
-    //     console.log("test")
-    //     const dim = Dimensions.get('screen');
-    //     if (dim.width >= dim.height){
-    //         setIsLandscape(true);
-    //     }else{
-    //         setIsLandscape(false);
-    //     }
-    //     })
+    const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null)
 
 
     React.useEffect(() => {
@@ -66,7 +51,7 @@ const CLockInOutForm = () => {
             severity: "error"
         })
     }
- 
+
     const handleSubmit = async () => {
         let message = "";
         let severity = "error"
@@ -79,7 +64,7 @@ const CLockInOutForm = () => {
                 }
             })
             dispatch(addNewCurrentUserClock(data))
-            setStatus(data)
+            dispatch(setCurrentUserStatus(data))
             message = data.status ? "Arrival registered with success" : "Departure registered with success";
             severity = "success";
         } catch (error) {
@@ -127,7 +112,7 @@ const styles = StyleSheet.create({
     clockInOutButton: {
         height: 180,
         width: 180,
-        borderRadius: "50%",
+        borderRadius: 90,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

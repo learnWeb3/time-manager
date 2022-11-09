@@ -10,5 +10,13 @@ export const routes = {
     dashboard: {
         name: "dashboard",
         title: "Dashboard"
+    },
+    profile: {
+        name: "profile",
+        title: "Profile"
+    },
+    timetable: {
+        name: "timetable",
+        title: 'Timetable'
     }
 }

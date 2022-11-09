@@ -319,9 +319,14 @@ defmodule TimeManager.Application do
     userId = Map.get(params, "userId", nil)
 
     current_user_status =
-      get_user_status(%{
-        "userId" => userId
-      })
+      try do
+        get_user_status(%{
+          "userId" => userId
+        })
+      rescue
+        _e ->
+          nil
+      end
 
     unix_datetime = get_unix_current_time()
     year_in_seconds = 365 * 24 * 60 * 60

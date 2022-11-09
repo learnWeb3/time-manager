@@ -125,16 +125,16 @@ const LoginForm = () => {
         <>
             <View style={{flex:2}}>
                 <InputGroup
+                    label={"Email"}
                     isError={formData.email.isError}
                     errors={formData.email.errors}
                     value={formData.email.value}
-                    label="Email"
                     handleInput={email => handleEmail(email)}/>
                 <InputGroup
+                    label={"Password"}
                     isError={formData.password.isError}
                     errors={formData.password.errors}
                     value={formData.password.value}
-                    label="Password"
                     handleInput={password => handlePassword(password)}
                     secureTextEntry={true}/>
             </View>
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     },
     container: {
         width: "100%",
-        padding:24
+        padding: 24
     },
 });
 
