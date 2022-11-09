@@ -39,8 +39,7 @@ export default {
             "backgroundColor": "#FFFFFF"
         },
         "package": "com.yourcompany.yourappname",
-        "versionCode": 1,
-        "buildType": "apk"
+        "versionCode": 1
     },
     "web": {
         "favicon": "./assets/time_manager_favicon.png"
