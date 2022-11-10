@@ -42,7 +42,7 @@ export const useGlobalStore = defineStore("global", {
         curve: "straight",
       },
       title: {
-        text: "User presence duration time evolution (current user vs all other users)",
+        text: "User presence time evolution (current user vs all other users)",
         align: "left",
       },
       grid: {
@@ -100,7 +100,7 @@ export const useGlobalStore = defineStore("global", {
         curve: "straight",
       },
       title: {
-        text: "User presence duration time evolution (current user vs all other users)",
+        text: "User presence time evolution (current user vs all other users)",
         align: "left",
       },
       grid: {
@@ -158,7 +158,7 @@ export const useGlobalStore = defineStore("global", {
         curve: "straight",
       },
       title: {
-        text: "User presence duration time evolution (current user vs all other users)",
+        text: "User presence time evolution (current user vs all other users)",
         align: "left",
       },
       grid: {
