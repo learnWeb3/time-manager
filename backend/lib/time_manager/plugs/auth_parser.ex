@@ -26,9 +26,6 @@ defmodule TimeManager.Plugs.Auth do
     end
   end
 
-  def call(_conn, _default) do
-  end
-
   def auth_guard(conn) do
     extract_token(conn.req_headers)
   end

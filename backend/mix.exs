@@ -51,7 +51,8 @@ defmodule TimeManager.MixProject do
       {:postgrex, "~> 0.11"},
       {:corsica, "~> 1.2"},
       {:joken, "~> 2.5"},
-      {:bcrypt_elixir, "~> 3.0"}
+      {:bcrypt_elixir, "~> 3.0"},
+      {:hammer, "~> 6.0"}
     ]
   end
 

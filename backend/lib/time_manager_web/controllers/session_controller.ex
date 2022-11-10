@@ -4,9 +4,6 @@ defmodule TimeManagerWeb.SessionController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  # auth middleware
-  plug(TimeManager.Plugs.Auth, "" when action in [:whoami])
-
   # check authorized parameters
 
   plug(

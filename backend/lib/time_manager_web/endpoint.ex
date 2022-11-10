@@ -2,6 +2,13 @@ defmodule TimeManagerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :time_manager
 
   alias TimeManager.Application
+  alias TimeManager.Plugs.RateLimiter
+
+  # configure rate limiting for the app
+  # plug(RateLimiter, %{
+  #   "scale_ms" => 1000,
+  #   "limit" => 50
+  # })
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.

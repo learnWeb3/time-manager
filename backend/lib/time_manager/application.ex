@@ -158,6 +158,7 @@ defmodule TimeManager.Application do
           AND clocks.time >= $3
           AND clocks.time <= $4
           GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          ORDER BY TO_CHAR(TO_TIMESTAMP(clocks.time), $1) ASC
           """
 
           params = [periodicity, status, startDatetime, endDatetime]
@@ -203,6 +204,7 @@ defmodule TimeManager.Application do
           AND clocks.time >= $4
           AND clocks.time <= $5
           GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          ORDER BY TO_CHAR(TO_TIMESTAMP(clocks.time), $1) ASC
           """
 
           {userId, _} = Integer.parse(userId)
@@ -250,6 +252,7 @@ defmodule TimeManager.Application do
           AND clocks.time <= $4
           AND clocks.id != $5
           GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          ORDER BY TO_CHAR(TO_TIMESTAMP(clocks.time), $1) ASC
           """
 
           params = [periodicity, status, startDatetime, endDatetime, current_user_status_id]
@@ -297,6 +300,7 @@ defmodule TimeManager.Application do
           AND clocks.time <= $5
           AND clocks.id != $6
           GROUP BY clocks.user_id, TO_CHAR(TO_TIMESTAMP(clocks.time), $1)
+          ORDER BY TO_CHAR(TO_TIMESTAMP(clocks.time), $1) ASC
           """
 
           {userId, _} = Integer.parse(userId)
@@ -317,6 +321,7 @@ defmodule TimeManager.Application do
             )
 
           Enum.map(result.rows, fn [sum, userId, periodicity] -> {sum, userId, periodicity} end)
+
         end
       end
     end
