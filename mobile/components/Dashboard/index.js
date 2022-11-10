@@ -9,7 +9,7 @@ const Dashboard = () => {
 
     const currentUser = useSelector((state) => state.currentUser.value);
     const [presenceData, setPresenceData] = React.useState(null)
-    const [selectedPeriodicity, setSelectedPeriodicity] = React.useState("day")
+    const [selectedPeriodicity, setSelectedPeriodicity] = React.useState("week")
 
     React.useEffect(() => {
         if (currentUser && selectedPeriodicity) {
@@ -25,9 +25,6 @@ const Dashboard = () => {
         <View style={styles.container}>
 
             <View style={styles.filterContainer}>
-                <Button textColor={selectedPeriodicity === "day" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8, borderRadius:0, fontSize:10 }} mode={selectedPeriodicity === "day" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("day")}>
-                    Day
-                </Button>
                 <Button textColor={selectedPeriodicity === "week" ? "#FFF" : "#001f54"} style={{ marginRight: 8, marginBottom: 8,borderRadius:0,fontSize:20}} mode={selectedPeriodicity === "week" ? "contained" : "text"} onPress={() => setSelectedPeriodicity("week")}>
                     Week
                 </Button>

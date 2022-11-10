@@ -11,7 +11,7 @@ import logo from '../../assets/time_manager_icon.png'
 const LoginScreen = () => {
    return <View style={{ flex: 1}}>
             <View style={styles.image}>
-               <Image style={{ marginTop: 30, height: 45, width:'80%', resizeMode: 'stretch', maxWidth: "80%" }} source={require('../../assets/time_manager_icon.png')} />
+               <Image style={{ marginTop: 30, height: 300, width:350, resizeMode: 'stretch' }} source={require('../../assets/time_manager_icon.png')} />
             </View>
             <View style={styles.text}>
                <Text style={{fontFamily:"Poppins", color:"#001f54"}} variant="headlineMedium">Sign in</Text>

@@ -15,7 +15,6 @@ const CLockInOutForm = () => {
     const { alert, setAlert, component: Snackbar } = useAlert()
     const currentUser = useSelector((state) => state.currentUser.value)
     const status = useSelector((state) => state.currentUserStatus.value)
-
     const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null)
 
 
@@ -86,8 +85,11 @@ const CLockInOutForm = () => {
                 </View>
                 <View  style={{flex:2,alignItems: 'center', justifyContent: 'center'}}>
                     <Button  onPress={handleSubmit}>
-                        {!elapsedTimeSinceArrival ?<Image style={{height:150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
-                        :<Image  style={{height: 150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
+                    onPress={()=>setBool(!bool)}
+                        {!elapsedTimeSinceArrival ?
+                        <Image style={{height:150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
+                        :
+                        <Image  style={{height: 150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
                     </Button> 
                 </View>
                 <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
