@@ -12,7 +12,7 @@ const httpApi = axios.create({
 httpApi.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
-    if (error.response.status === 401) {
+    if (error && error.response && error.response.status === 401) {
         LocalStorage.removeData(env.LOCAL_STORAGE_CURRENT_USER_KEY)
             .then(() => setCurrentUser(null))
     }

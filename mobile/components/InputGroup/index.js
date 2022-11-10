@@ -2,7 +2,7 @@ import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, Text } from 'react-native-paper';
 
-const InputGroup = ({label, isError, value, errors, handleInput, secureTextEntry = false }) => {
+const InputGroup = ({ label,isError, value, errors, handleInput, secureTextEntry = false }) => {
 
     return <View style={styles.container}>
         <TextInput
