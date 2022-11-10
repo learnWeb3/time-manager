@@ -95,11 +95,18 @@ defmodule TimeManager.Application do
   end
 
   def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
-    Enum.with_index(departure_sums, fn departure_sum, index ->
-      {departure_sum, userId, periodicity} = departure_sum
-      {arrival_sum, userId, periodicity} = Enum.at(arrival_sums, index)
 
-      %{duration: departure_sum - arrival_sum, user_id: userId, periodicity: periodicity}
+    Enum.with_index(departure_sums, fn departure_sum, index ->
+      {departure_time, userId, periodicity} = departure_sum
+
+      arrival_sum = Enum.at(arrival_sums, index, nil)
+
+      if not is_nil(arrival_sum) do
+        {arrival_time, userId, periodicity} = arrival_sum
+        %{duration: departure_time - arrival_time, user_id: userId, periodicity: periodicity}
+      else
+        %{duration: 0, user_id: userId, periodicity: periodicity}
+      end
     end)
   end
 
@@ -354,6 +361,7 @@ defmodule TimeManager.Application do
     startDate = Map.get(params, "start", "#{unix_datetime - year_in_seconds}")
     # default to current datetime in seconds
     endDate = Map.get(params, "end", "#{unix_datetime}")
+
     {startDatetime, _} = Integer.parse(startDate)
     {endDatetime, _} = Integer.parse(endDate)
 
@@ -467,7 +475,7 @@ defmodule TimeManager.Application do
     user = Repo.get(User, id)
 
     if is_nil(user) do
-      raise NotFoundError, message: "user not found for user with id " <> id
+      raise NotFoundError, message: "user not found for user with id " <> Integer.to_string(id)
     else
       user
     end

@@ -17,6 +17,7 @@ defmodule TimeManager.Plugs.Auth do
       end
     rescue
       e ->
+        IO.inspect(e)
         error = %{message: Exception.message(e)}
 
         conn

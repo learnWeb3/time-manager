@@ -4,7 +4,7 @@ defmodule TimeManagerWeb.ClockController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :user_clocks, :presence])
+  plug(TimeManager.Plugs.Auth, "")
 
   # check authorized_params
   plug(

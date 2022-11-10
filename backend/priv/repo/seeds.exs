@@ -88,25 +88,21 @@ rescue
 end
 
 try do
-  current_time_second = Application.get_unix_current_time()
+  current_time_second = 1667973600
   last_year_second = current_time_second - 365 * 24 * 60 * 60
 
-  day_number_between_start_end =
-    (Kernel.floor(current_time_second) - Kernel.floor(last_year_second)) / (24 * 50 * 60)
-
   users = Application.list_users(%{})
-
-  IO.inspect(users)
 
   Enum.map(users, fn %User{} = user ->
     Enum.each(0..365, fn day_number ->
       # arrival each day during a year
-      arrival = last_year_second + day_number * (24 * 60 * 60)
+      arrival = last_year_second + day_number * 24 * 60 * 60
       # duration of a shift between 1 and 11 hours
       duration_seconds = Enum.random((60 * 60 * 1)..(60 * 60 * 11))
       # calculation of the time of departure
       departure = arrival + duration_seconds
 
+      IO.inspect(day_number)
       # clock in
       Application.create_clock(user.id, %{
         "time" => arrival
