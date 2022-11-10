@@ -163,6 +163,7 @@ export default defineComponent({
     },
     ActiveUser() {
       this.store.user = this.model;
+      this.store.user.password = "";
       this.store.avatar = "https://eu.ui-avatars.com/api/?rounded=true&name=" + this.store.user.username
       switch (this.store.user.role) {
         case 1:
@@ -190,7 +191,7 @@ export default defineComponent({
       let res = null;
       var config = {
         method: "get",
-        url: "http://localhost:4000/api/users",
+        url: process.env.API_ROOT_URL + "/users",
         headers: {
           Authorization: "Bearer " + this.store.jwt,
         },
@@ -218,7 +219,7 @@ export default defineComponent({
 
       var config = {
         method: "post",
-        url: "http://localhost:4000/api/sessions/login",
+        url: process.env.API_ROOT_URL + "/sessions/login",
         headers: {
           "Content-Type": "application/json",
         },
