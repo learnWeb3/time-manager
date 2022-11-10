@@ -88,14 +88,14 @@ rescue
 end
 
 try do
-  last_year_second = 1_661_151_600
+  start_time = 1_636_959_600
 
   users = Application.list_users(%{})
 
   Enum.map(users, fn %User{} = user ->
-    Enum.each(0..100, fn day_number ->
+    Enum.each(0..400, fn day_number ->
       # arrival each day during a year
-      arrival = last_year_second + day_number * 86400
+      arrival = start_time + (day_number * 86400)
       # duration of a shift between 1 and 12 hours
       shift_duration_hours = Enum.random(1..10)
       duration_seconds = shift_duration_hours * 3600
