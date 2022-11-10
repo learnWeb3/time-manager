@@ -85,7 +85,6 @@ const CLockInOutForm = () => {
                 </View>
                 <View  style={{flex:2,alignItems: 'center', justifyContent: 'center'}}>
                     <Button  onPress={handleSubmit}>
-                    onPress={()=>setBool(!bool)}
                         {!elapsedTimeSinceArrival ?
                         <Image style={{height:150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
                         :
