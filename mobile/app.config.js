@@ -1,8 +1,8 @@
 const { join } = require('path')
+
 require('dotenv').config({
     path: join(process.cwd(), '.env')
-});
-
+})
 
 export default {
     "name": "time-manager",

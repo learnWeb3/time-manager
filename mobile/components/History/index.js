@@ -23,37 +23,32 @@ const History = () => {
     return (
         <>
             <View style={styles.filterContainer}>
-                <Button textColor={selectedFilter === true ? "#FFF" : "#001f54"} style={{ width:"50%", borderRadius:0 , backgroundColor:(selectedFilter ? "#001f54" :"#FFF") }} mode={selectedFilter ? "contained" : "text"} onPress={() => setSelectedFilter(true)}>
-                    Arrival
-                </Button> 
-                <Button textColor={selectedFilter === false ? "#FFF" : "#001f54"} style={{ width:"50%", borderRadius:0 , backgroundColor:(!selectedFilter ? "#001f54" :"#FFF") }} mode={selectedFilter ? "text" : "contained"} onPress={() => setSelectedFilter(false)}>
-                    Departure
+                <Button textColor={selectedFilter === true ? "#FFF" : "#5393ff"} style={{ marginRight: 8 }} mode={selectedFilter ? "contained" : "text"} onPress={() => setSelectedFilter(true)}>
+                    arrival
+                </Button>
+                <Button textColor={selectedFilter === false ? "#FFF" : "#5393ff"} style={{ marginRight: 8 }} mode={selectedFilter ? "text" : "contained"} onPress={() => setSelectedFilter(false)}>
+                    departure
                 </Button>
             </View>
-            <ScrollView style={styles.clocksListContainer}>
-                <FlatList
-                    data={displayedClocks}
-                    renderItem={renderClock}
-                    keyExtractor={item => item.id}
-                />
-            </ScrollView>
+            <FlatList
+                data={displayedClocks}
+                renderItem={renderClock}
+                keyExtractor={item => item.id}
+            />
         </>
 
     )
 }
 
 const styles = StyleSheet.create({
-    clocksListContainer: {
-        height: "100%"
-    },
     filterContainer: {
-        fontStyle:"Poppins",
         alignItems: "center",
         justifyContent: "flex-start",
         display: "flex",
         flexDirection: "row",
+        marginTop: 16,
         marginBottom: 16,
-        shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3
+        marginLeft: 16
     }
 })
 

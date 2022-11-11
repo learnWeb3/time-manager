@@ -121,6 +121,7 @@ defmodule TimeManager.Application do
   end
 
   def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
+
     Enum.with_index(departure_sums, fn departure_sum, index ->
       {departure_time, _userId, _periodicity} = departure_sum
 
@@ -128,6 +129,8 @@ defmodule TimeManager.Application do
 
       %{duration: departure_time - arrival_time, user_id: userId, periodicity: periodicity}
     end)
+
+
   end
 
   def build_presence_query(

@@ -7,7 +7,7 @@ const ClockInOutListItem = ({ title, description, }) => {
         color="#FFF"
         title={props => <Text {...props}>{title}</Text>}
         description={description}
-        left={props => <List.Icon {...props} icon="clock" color="#1282A2" />}
+        left={props => <List.Icon {...props} icon="clock" />}
     />
 }
 

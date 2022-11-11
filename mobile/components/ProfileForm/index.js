@@ -156,9 +156,8 @@ const ProfileForm = () => {
                     secureTextEntry={true}
                 />
 
-               
-                <Button  disabled={username.isError || email.isError || password.isError} style={{borderRadius:4}} textColor={"white"} buttonColor={"#001f54"}  mode="contained" onPress={handleSubmit}>
-                    Edite
+                <Button disabled={username.isError || email.isError || password.isError} mode="contained" onPress={handleSubmit}>
+                    ok
                 </Button>
 
             </View>

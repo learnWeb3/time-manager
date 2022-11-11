@@ -1,4 +1,5 @@
 import moment from "moment";
+import { defaultMemoize } from "reselect";
 
 
 export class ApplicationDate {
@@ -11,7 +12,7 @@ export class ApplicationDate {
     static addTrailingZero(value) {
         if (value < 10) {
             return `0${value}`
-        }else{
+        } else {
             return `${value}`
         }
     }
@@ -26,6 +27,15 @@ export class ApplicationDate {
             minutes: ApplicationDate.addTrailingZero(minutes),
             seconds: ApplicationDate.addTrailingZero(seconds)
         }
+    }
+
+    static formatDateBoundary(timestampSecond) {
+        const date = new Date(timestampSecond * 1000);
+        date.setHours(1);
+        date.setMinutes(0);
+        date.setSeconds(0);
+
+        return date.getTime() / 1000
     }
 
 }

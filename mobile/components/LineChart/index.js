@@ -27,7 +27,7 @@ const ApplicationLineChart = ({
         labels: labels,
         datasets: datasets.map((dataset) => ({
             data: dataset,
-            color: (opacity = 1) => "#1282A2", // optional
+            color: (opacity = 1) => "#5393ff", // optional
             strokeWidth: 2 // optional
         })),
         legend: legend // optional

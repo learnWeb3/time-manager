@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { ScrollView, FlatList, StyleSheet } from 'react-native';
+import { FlatList } from 'react-native';
 import ScheduleListItem from '../ScheduleListItem/index';
 
 const Timetable = () => {
@@ -33,21 +33,12 @@ const Timetable = () => {
         return <ScheduleListItem key={schedule.id} schedule={schedule} currentUser={currentUser} />
     }
     return (
-        <ScrollView style={styles.schedulesListContainer}>
-            <FlatList
-                data={formattedSchedules}
-                renderItem={renderFormattedSchedule}
-                keyExtractor={item => item.id}
-            />
-        </ScrollView>
+        <FlatList
+            data={formattedSchedules}
+            renderItem={renderFormattedSchedule}
+            keyExtractor={item => item.id}
+        />
     )
 }
-
-const styles = StyleSheet.create({
-    schedulesListContainer: {
-        height: "100%"
-    }
-})
-
 
 export default Timetable

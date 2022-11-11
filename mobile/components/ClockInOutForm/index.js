@@ -1,5 +1,5 @@
-import React , {useEffect,useState} from 'react';
-import { ScrollView, StyleSheet, View, Image, Dimensions } from 'react-native';
+import * as React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { createClock } from '../../http/api';
@@ -8,13 +8,14 @@ import { ApplicationDate } from '../../date/index';
 import { addNewCurrentUserClock } from '../../stores/reducers/currentUserClocksReducer';
 import { setCurrentUserStatus } from '../../stores/reducers/currentUserStatusReducer';
 
-
 const CLockInOutForm = () => {
+
     const dispatch = useDispatch();
     const [timeIntervalRef, setTimeIntervalRef] = React.useState(null)
     const { alert, setAlert, component: Snackbar } = useAlert()
     const currentUser = useSelector((state) => state.currentUser.value)
     const status = useSelector((state) => state.currentUserStatus.value)
+
     const [elapsedTimeSinceArrival, setElapsedTimeSinceArrival] = React.useState(null)
 
 
@@ -78,28 +79,22 @@ const CLockInOutForm = () => {
     }
 
     return (
+
         <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-                <View style={{flex:2,alignItems: "center",justifyContent: "center"}}>
-                    <Text variant="bodyMedium" style={{marginTop:"50%",fontSize:30, color:"#001f54", fontFamily:"Poppins" }}> {!elapsedTimeSinceArrival ?  "Clock in" : " Clock Out" }</Text>
-                </View>
-                <View  style={{flex:2,alignItems: 'center', justifyContent: 'center'}}>
-                    <Button  onPress={handleSubmit}>
-                        {!elapsedTimeSinceArrival ?
-                        <Image style={{height:150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockin.png')} ></Image> 
-                        :
-                        <Image  style={{height: 150 ,width:150, resizeMode: 'stretch', shadowColor: '#171717',shadowOffset: {width: -2, height: 4},shadowOpacity: 0.2,shadowRadius: 3 }} source={require('../../assets/addClockOut.png')} ></Image>  }
-                    </Button> 
-                </View>
-                <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={{color:"#001f54", fontSize:30, fontFamily:"Poppins"}}>Presence time </Text>
-                    <Text variant="titleSmall" style={{marginTop:30,fontSize:30, fontFamily:"Orbitron"}}>
-                        {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "00:00:00"}
+
+                <Text variant="bodyMedium" style={{ marginBottom: 16, marginTop: 16 }}>Press to clock in/out</Text>
+
+                <Button buttonColor={status && status.status || !status ? "#e91e63" : "#5393ff"} mode="contained" onPress={handleSubmit} style={styles.clockInOutButton}>
+                    <Text variant="titleSmall" style={{ color: "#FFF" }}>
+                        {elapsedTimeSinceArrival ? `${elapsedTimeSinceArrival.hours}:${elapsedTimeSinceArrival.minutes}:${elapsedTimeSinceArrival.seconds}` : "Just arrived !"}
                     </Text>
-                </View>
+                </Button>
+
                 <Snackbar onClose={handleCloseAlert} toggled={alert.toggled} message={alert.message} severity={alert.severity} />
             </View>
         </ScrollView>
+
     );
 };
 

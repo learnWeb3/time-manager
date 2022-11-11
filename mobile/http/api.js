@@ -12,7 +12,7 @@ const httpApi = axios.create({
 httpApi.interceptors.response.use(function (response) {
     return response;
 }, function (error) {
-    if (error && error.response && error.response.status === 401) {
+    if (error.response.status === 401) {
         LocalStorage.removeData(env.LOCAL_STORAGE_CURRENT_USER_KEY)
             .then(() => setCurrentUser(null))
     }
@@ -26,7 +26,6 @@ const mergeAuthHeaders = (axiosInstance, token) => {
 }
 
 export const login = async (data = { email: "", password: "" }) => {
-    console.log(httpApi.defaults.headers)
     return await httpApi.post('/sessions/login', data).then((response) => response.data)
 }
 
@@ -84,6 +83,6 @@ export const getUserClocks = (token, userId) => mergeAuthHeaders(httpApi, token)
     .get(`/clocks/${userId}`)
     .then((response) => response.data)
 
-export const getUserPresences = (token, userId, periodicity = "day") => mergeAuthHeaders(httpApi, token)
-    .get(`/clocks/presence?userId=${userId}&periodicity=${periodicity}`)
+export const getUserPresences = (token, userId, periodicity = "day", end = Date.now() / 1000, start = (Date.now() / 1000) - (86400 * 365)) => mergeAuthHeaders(httpApi, token)
+    .get(`/clocks/presence?userId=${userId}&periodicity=${periodicity}&start=${start}&end=${end}`)
     .then((response) => response.data)
