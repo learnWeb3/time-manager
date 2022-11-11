@@ -120,8 +120,20 @@ defmodule TimeManager.Application do
     DateTime.to_unix(current_datetime, :second)
   end
 
-  def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
+  def get_unix_current_time_at_one_am do
+    {:ok, current_datetime} = DateTime.now("Etc/UTC")
+    Kernel.floor(DateTime.to_unix(current_datetime, :second) / 86400) * 86400
+  end
 
+  def change_unix_time_at_one_am(unix_time) do
+    Kernel.floor(unix_time / 86400) * 86400
+  end
+
+  def change_unix_time_at_eleven_pm(unix_time) do
+    Kernel.floor(unix_time / 86400) * 86400 + 3600 * 11
+  end
+
+  def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
     Enum.with_index(departure_sums, fn departure_sum, index ->
       {departure_time, _userId, _periodicity} = departure_sum
 
@@ -129,8 +141,6 @@ defmodule TimeManager.Application do
 
       %{duration: departure_time - arrival_time, user_id: userId, periodicity: periodicity}
     end)
-
-
   end
 
   def build_presence_query(
@@ -259,7 +269,7 @@ defmodule TimeManager.Application do
   def get_presence(params) do
     userId = Map.get(params, "userId", nil)
 
-    unix_datetime = get_unix_current_time()
+    unix_datetime = get_unix_current_time_at_one_am()
     year_in_seconds = 365 * 24 * 60 * 60
 
     # one of : [global, day, week, month] default to global
@@ -282,12 +292,23 @@ defmodule TimeManager.Application do
     }
 
     periodicity = Map.get(params, "periodicity", "global")
-    startDate = Map.get(params, "start", "#{unix_datetime - year_in_seconds}")
-    # default to current datetime in seconds
-    endDate = Map.get(params, "end", "#{unix_datetime}")
 
-    {startDatetime, _} = Integer.parse(startDate)
-    {endDatetime, _} = Integer.parse(endDate)
+    startDatetime =
+      if is_nil(Map.get(params, "start", nil)) do
+        unix_datetime - year_in_seconds
+      else
+        {time, _} = Integer.parse(Map.get(params, "start", nil))
+        change_unix_time_at_one_am(time)
+      end
+
+    # default to current datetime in seconds
+    endDatetime =
+      if is_nil(Map.get(params, "end", nil)) do
+        change_unix_time_at_eleven_pm(unix_datetime - year_in_seconds)
+      else
+        {time, _} = Integer.parse(Map.get(params, "end", nil))
+        change_unix_time_at_eleven_pm(time)
+      end
 
     current_periodicity = Map.get(available_periodicity, periodicity)
 

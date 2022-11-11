@@ -4,7 +4,6 @@ import ApplicationLineChart from '../LineChart/index';
 import { useSelector } from 'react-redux';
 import { getUserPresences } from '../../http/api';
 import { Button, Text } from 'react-native-paper';
-import { ApplicationDate } from '../../date/index';
 
 const Dashboard = () => {
 
@@ -12,20 +11,28 @@ const Dashboard = () => {
     const [presenceData, setPresenceData] = React.useState(null)
     const [selectedPeriodicity, setSelectedPeriodicity] = React.useState("day")
 
+    const formatDayData = (data) => data.map(({ periodicity, ...rest }) => {
+        const periodicityArr = periodicity.split(':')
+        return ({
+            ...rest,
+            periodicity: periodicityArr[0] + '/' + periodicityArr[1]
+        })
+    })
+
     React.useEffect(() => {
         if (currentUser && selectedPeriodicity) {
 
-            let end = ApplicationDate.formatDateBoundary(Math.round(Date.now() / 1000))
-            let start = ApplicationDate.formatDateBoundary(Math.round((Date.now() / 1000) - (86400 * 365)))
+            let end = Math.round(Date.now() / 1000)
+            let start = Math.round((Date.now() / 1000) - (86400 * 365))
 
             if (selectedPeriodicity === "day") {
-                start = ApplicationDate.formatDateBoundary(Math.round((Date.now() / 1000) - (86400 * 4)))
+                start = Math.round((Date.now() / 1000) - (86400 * 7))
             } else if (selectedPeriodicity === "week") {
-                start = ApplicationDate.formatDateBoundary(Math.round((Date.now() / 1000) - (86400 * 42)))
+                start = Math.round((Date.now() / 1000) - (86400 * 42))
             }
 
             getUserPresences(currentUser.token, currentUser.user.id, selectedPeriodicity, end, start)
-                .then((data) => setPresenceData(data.data))
+                .then((data) => setPresenceData(selectedPeriodicity === "day" ? formatDayData(data.data) : data.data))
         }
     }, [currentUser, selectedPeriodicity])
 
