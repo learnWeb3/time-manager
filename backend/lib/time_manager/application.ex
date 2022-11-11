@@ -130,7 +130,7 @@ defmodule TimeManager.Application do
   end
 
   def change_unix_time_at_eleven_pm(unix_time) do
-    Kernel.floor(unix_time / 86400) * 86400 + 3600 * 11 + 59 * 60
+    Kernel.floor(unix_time / 86400) * 86400 + 86400 * 11 + 59*60
   end
 
   def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
