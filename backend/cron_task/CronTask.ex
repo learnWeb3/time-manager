@@ -30,5 +30,5 @@ defmodule CronTask do
 end
 
 clocked_in_users_ids = CronTask.daily_clock_manager_clock_out()
-Process.sleep(90000)
+Process.sleep(10*60*1000)
 CronTask.daily_clock_manager_reclock_in(clocked_in_users_ids)

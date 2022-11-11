@@ -120,17 +120,17 @@ defmodule TimeManager.Application do
     DateTime.to_unix(current_datetime, :second)
   end
 
-  def get_unix_current_time_at_one_am do
+  def get_unix_current_time_at_zero_am do
     {:ok, current_datetime} = DateTime.now("Etc/UTC")
-    Kernel.floor(DateTime.to_unix(current_datetime, :second) / 86400) * 86400
+    Kernel.floor(DateTime.to_unix(current_datetime, :second) / 86400) * 86400 - 60 * 60
   end
 
-  def change_unix_time_at_one_am(unix_time) do
-    Kernel.floor(unix_time / 86400) * 86400
+  def change_unix_time_at_zero_am(unix_time) do
+    Kernel.floor(unix_time / 86400) * 86400 - 60 * 60
   end
 
   def change_unix_time_at_eleven_pm(unix_time) do
-    Kernel.floor(unix_time / 86400) * 86400 + 3600 * 23 + 59*60
+    Kernel.floor(unix_time / 86400) * 86400 + 22 * 3600 + 59 * 60 + 59
   end
 
   def calculate_presence_duration_from_sums(departure_sums, arrival_sums) do
@@ -269,7 +269,7 @@ defmodule TimeManager.Application do
   def get_presence(params) do
     userId = Map.get(params, "userId", nil)
 
-    unix_datetime = get_unix_current_time_at_one_am()
+    unix_datetime = get_unix_current_time_at_zero_am()
     year_in_seconds = 365 * 24 * 60 * 60
 
     # one of : [global, day, week, month] default to global
@@ -298,7 +298,7 @@ defmodule TimeManager.Application do
         unix_datetime - year_in_seconds
       else
         {time, _} = Integer.parse(Map.get(params, "start", nil))
-        change_unix_time_at_one_am(time)
+        change_unix_time_at_zero_am(time)
       end
 
     # default to current datetime in seconds

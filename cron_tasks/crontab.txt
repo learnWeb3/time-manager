@@ -1,1 +1,1 @@
-59 23 * * * /cron_tasks/daily_clock_manager.sh >> /var/log/script.log
+55 23 * * * /cron_tasks/daily_clock_manager.sh >> /var/log/script.log
