@@ -4,6 +4,7 @@ import * as React from 'react'
 import AuthLoader from './components/AuthLoader';
 import { MD3LightTheme as DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import AuthenticationRouter from './components/AuthenticationRouter';
+import NetworkManager from './components/NetworkManager/index';
 
 
 const theme = {
@@ -20,7 +21,9 @@ export default function App() {
     <Provider store={stores}>
       <AuthLoader />
       <PaperProvider theme={theme}>
-        <AuthenticationRouter />
+        <NetworkManager>
+          <AuthenticationRouter />
+        </NetworkManager>
       </PaperProvider>
     </Provider>
   );
