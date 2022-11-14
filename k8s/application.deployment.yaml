@@ -69,4 +69,16 @@ spec:
       imagePullSecrets:
         - name: epitech-cluster-secret
 ---
-# APPLICATION SERVICES (INGRESS ?? // LOADBALANCER ?? // TO DO CHECK ON AZURE ) MAP PORT 80 TO 80 ON HOST
+# APPLICATION SERVICES
+apiVersion: v1
+kind: Service
+metadata:
+  name: application
+spec:
+  selector:
+    tier: application
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
