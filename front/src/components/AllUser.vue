@@ -447,10 +447,15 @@ export default defineComponent({
     },
     async ValueGraphMonthly() {
       let final;
+      let dateStart = Math.floor(Date.now() / 1000) - 7 * 86400 * 54;
+      let dateEnd = Math.floor(Date.now() / 1000);
       var config = {
         method: "get",
         url:
-          process.env.API_ROOT_URL + "/clocks/presence?periodicity=month",
+          process.env.API_ROOT_URL + "/clocks/presence?periodicity=month&start=" +
+          dateStart +
+          "&end=" +
+          dateEnd,
         headers: {
           Authorization: "Bearer " + this.store.jwt,
         },
