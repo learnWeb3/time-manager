@@ -32,6 +32,8 @@ defmodule TimeManagerWeb.SessionController do
     try do
       sign_in_claim = Application.sign_in(email, password)
 
+      Process.sleep(1000)
+
       conn
       |> put_status(:created)
       |> render("session.json", session: sign_in_claim)

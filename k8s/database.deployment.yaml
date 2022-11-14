@@ -1,0 +1,104 @@
+# VOLUMES AND CLAIMS (TO DO ADAPT ACCORDING AZURE FILE STORAGE)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: database-volume
+  labels:
+    type: local
+spec:
+  storageClassName: physical-storage # define a name to be used in the claims to request storage
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data" # /data path on node folder must exists
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-volume-claim
+spec:
+  storageClassName: physical-storage # uses the storage class name defined above
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+# DATABASE ENV (BASE64)
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: database-secrets
+data:
+  postgres_password: cnVuMzE0O3JhYmJpdA==
+  postgres_user: cG9zdGdyZXM=
+  postgres_db: dGltZV9tYW5hZ2Vy
+---
+# DATABASE DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  labels:
+    tier: database
+spec:
+  volumes:
+    - name: database-storage
+      persistentVolumeClaim:
+        claimName: database-volume-claim
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: database
+  template:
+    metadata:
+      labels:
+        tier: database
+    spec:
+      containers:
+        - image: postgres:latest
+          tier: database
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: postgres_password
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: postgres_user
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: postgres_db
+          ports:
+            - containerPort: 5432
+              tier: database
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: database-storage
+      restartPolicy: Always
+---
+# INTERNAL SERVICES forward traffic to database on port 5432 using postgres hostname internally
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    tier: database
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432

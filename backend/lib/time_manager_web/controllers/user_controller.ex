@@ -3,10 +3,17 @@ defmodule TimeManagerWeb.UserController do
 
   alias TimeManager.Application
   alias TimeManager.Application.Role
+  alias TimeManager.Plugs.RateLimiter
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  plug(TimeManager.Plugs.Auth, "" when action in [:create, :show, :update, :delete])
+  plug(TimeManager.Plugs.Auth, "")
+
+  # configure rate limiting for the app
+  plug(RateLimiter, %{
+    "scale_ms" => 1000,
+    "limit" => 50
+  })
 
   # check user permission using token
   roles = Role.get()
